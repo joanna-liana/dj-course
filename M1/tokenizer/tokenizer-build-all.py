@@ -29,7 +29,7 @@ for TOKENIZER_OUTPUT_FILE, corpus_key in TOKENIZER_CONFIGS:
 
     # Get files from corpus
     FILES = [str(f) for f in CORPORA_FILES[corpus_key]]
-    print(f"Pliki: {len(FILES)}")
+    print(f"File count: {len(FILES)}")
 
     # 4. Train the Tokenizer
     tokenizer.train(FILES, trainer=trainer)
