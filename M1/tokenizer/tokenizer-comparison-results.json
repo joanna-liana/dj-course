@@ -1,0 +1,209 @@
+{
+  "Pan Tadeusz Księga 1": {
+    "text_length_chars": 43734,
+    "tokenizer_results": {
+      "bielik-v1": {
+        "token_count": 20481,
+        "avg_token_length": 2.395342024315219,
+        "max_token_length": 9,
+        "min_token_length": 1,
+        "compression_ratio": 2.1353449538596747,
+        "tokens_per_char": 0.4683084099327754
+      },
+      "bielik-v2": {
+        "token_count": 20480,
+        "avg_token_length": 2.3953125,
+        "max_token_length": 9,
+        "min_token_length": 1,
+        "compression_ratio": 2.13544921875,
+        "tokens_per_char": 0.4682855444276764
+      },
+      "bielik-v3": {
+        "token_count": 13177,
+        "avg_token_length": 3.779008879107536,
+        "max_token_length": 15,
+        "min_token_length": 1,
+        "compression_ratio": 3.3189648630188966,
+        "tokens_per_char": 0.30129876068962363
+      },
+      "tokenizer-next-270m": {
+        "token_count": 16178,
+        "avg_token_length": 2.745765854864631,
+        "max_token_length": 11,
+        "min_token_length": 1,
+        "compression_ratio": 2.7033007788354557,
+        "tokens_per_char": 0.36991814149174557
+      },
+      "tokenizer-pan-tadeusz": {
+        "token_count": 9985,
+        "avg_token_length": 3.6814221331997996,
+        "max_token_length": 14,
+        "min_token_length": 1,
+        "compression_ratio": 4.379969954932399,
+        "tokens_per_char": 0.22831206841359125
+      },
+      "tokenizer-wolnelektury": {
+        "token_count": 10045,
+        "avg_token_length": 3.6594325535092085,
+        "max_token_length": 14,
+        "min_token_length": 1,
+        "compression_ratio": 4.353807864609259,
+        "tokens_per_char": 0.2296839987195317
+      },
+      "tokenizer-nkjp": {
+        "token_count": 11066,
+        "avg_token_length": 3.3217964937646847,
+        "max_token_length": 14,
+        "min_token_length": 1,
+        "compression_ratio": 3.95210554852702,
+        "tokens_per_char": 0.2530296794256185
+      },
+      "tokenizer-all-corpora": {
+        "token_count": 10058,
+        "avg_token_length": 3.654702724199642,
+        "max_token_length": 14,
+        "min_token_length": 1,
+        "compression_ratio": 4.348180552793796,
+        "tokens_per_char": 0.2299812502858188
+      }
+    }
+  },
+  "The Pickwick Papers": {
+    "text_length_chars": 1746334,
+    "tokenizer_results": {
+      "bielik-v1": {
+        "token_count": 503669,
+        "avg_token_length": 3.8315203040091808,
+        "max_token_length": 16,
+        "min_token_length": 1,
+        "compression_ratio": 3.4672254992862377,
+        "tokens_per_char": 0.2884150454609485
+      },
+      "bielik-v2": {
+        "token_count": 503668,
+        "avg_token_length": 3.831521954938571,
+        "max_token_length": 16,
+        "min_token_length": 1,
+        "compression_ratio": 3.4672323832365763,
+        "tokens_per_char": 0.2884144728328029
+      },
+      "bielik-v3": {
+        "token_count": 729254,
+        "avg_token_length": 3.259434984244173,
+        "max_token_length": 12,
+        "min_token_length": 1,
+        "compression_ratio": 2.394685527950481,
+        "tokens_per_char": 0.41759136568376953
+      },
+      "tokenizer-next-270m": {
+        "token_count": 448215,
+        "avg_token_length": 3.896208292895151,
+        "max_token_length": 16,
+        "min_token_length": 1,
+        "compression_ratio": 3.896197137534442,
+        "tokens_per_char": 0.25666052427542496
+      },
+      "tokenizer-pan-tadeusz": {
+        "token_count": 926941,
+        "avg_token_length": 1.6677490800385353,
+        "max_token_length": 10,
+        "min_token_length": 1,
+        "compression_ratio": 1.8839753554972754,
+        "tokens_per_char": 0.5307925059009331
+      },
+      "tokenizer-wolnelektury": {
+        "token_count": 824016,
+        "avg_token_length": 1.796689627385876,
+        "max_token_length": 8,
+        "min_token_length": 1,
+        "compression_ratio": 2.119296227257723,
+        "tokens_per_char": 0.4718547540161275
+      },
+      "tokenizer-nkjp": {
+        "token_count": 725407,
+        "avg_token_length": 1.9820390484238504,
+        "max_token_length": 11,
+        "min_token_length": 1,
+        "compression_ratio": 2.4073850955394698,
+        "tokens_per_char": 0.4153884652076865
+      },
+      "tokenizer-all-corpora": {
+        "token_count": 750535,
+        "avg_token_length": 1.9156801481609784,
+        "max_token_length": 9,
+        "min_token_length": 1,
+        "compression_ratio": 2.3267855596341276,
+        "tokens_per_char": 0.429777465250061
+      }
+    }
+  },
+  "Fryderyk Chopin": {
+    "text_length_chars": 59585,
+    "tokenizer_results": {
+      "bielik-v1": {
+        "token_count": 25611,
+        "avg_token_length": 2.4180625512475107,
+        "max_token_length": 11,
+        "min_token_length": 1,
+        "compression_ratio": 2.3265393776111827,
+        "tokens_per_char": 0.42982294201560794
+      },
+      "bielik-v2": {
+        "token_count": 25610,
+        "avg_token_length": 2.4180398281921125,
+        "max_token_length": 11,
+        "min_token_length": 1,
+        "compression_ratio": 2.326630222569309,
+        "tokens_per_char": 0.4298061592682722
+      },
+      "bielik-v3": {
+        "token_count": 16338,
+        "avg_token_length": 4.017015546578529,
+        "max_token_length": 16,
+        "min_token_length": 1,
+        "compression_ratio": 3.6470192189986537,
+        "tokens_per_char": 0.2741965259713015
+      },
+      "tokenizer-next-270m": {
+        "token_count": 19325,
+        "avg_token_length": 3.0835705045278137,
+        "max_token_length": 13,
+        "min_token_length": 1,
+        "compression_ratio": 3.0833117723156533,
+        "tokens_per_char": 0.32432659226315347
+      },
+      "tokenizer-pan-tadeusz": {
+        "token_count": 20337,
+        "avg_token_length": 2.760633328416187,
+        "max_token_length": 13,
+        "min_token_length": 1,
+        "compression_ratio": 2.9298814967792692,
+        "tokens_per_char": 0.3413107325669212
+      },
+      "tokenizer-wolnelektury": {
+        "token_count": 16917,
+        "avg_token_length": 3.063604658036295,
+        "max_token_length": 16,
+        "min_token_length": 1,
+        "compression_ratio": 3.5221966069634094,
+        "tokens_per_char": 0.2839137366786943
+      },
+      "tokenizer-nkjp": {
+        "token_count": 14100,
+        "avg_token_length": 3.631418439716312,
+        "max_token_length": 17,
+        "min_token_length": 1,
+        "compression_ratio": 4.225886524822695,
+        "tokens_per_char": 0.23663673743391794
+      },
+      "tokenizer-all-corpora": {
+        "token_count": 14732,
+        "avg_token_length": 3.4756312788487644,
+        "max_token_length": 16,
+        "min_token_length": 1,
+        "compression_ratio": 4.044596796090144,
+        "tokens_per_char": 0.24724343375010488
+      }
+    }
+  }
+}
