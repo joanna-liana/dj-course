@@ -56,6 +56,15 @@ LLAMA_CONTEXT_SIZE=2048
 
 LLaMA support requires llama.cpp installation and C bindings (currently stub implementation).
 
+**Cerebras Inference (cloud):**
+```bash
+ENGINE=CEREBRAS
+CEREBRAS_API_KEY=your_cerebras_api_key_here
+CEREBRAS_MODEL_NAME=llama-3.3-70b
+```
+
+Get free API key: https://cloud.cerebras.ai
+
 ## Architecture
 
 ### Core Components

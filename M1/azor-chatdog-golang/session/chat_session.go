@@ -22,6 +22,9 @@ var EngineMapping = map[string]func() (llm.LLMClient, error){
 	"GEMINI": func() (llm.LLMClient, error) {
 		return llm.FromEnvironmentGemini()
 	},
+	"CEREBRAS": func() (llm.LLMClient, error) {
+		return llm.FromEnvironmentCerebras()
+	},
 }
 
 // ChatSession manages everything related to a single chat session
