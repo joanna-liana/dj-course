@@ -12,6 +12,7 @@ import (
 	"tms-data-generator/generator/config"
 	"tms-data-generator/generator/customers"
 	"tms-data-generator/generator/drivers"
+	"tms-data-generator/generator/shipments"
 	"tms-data-generator/generator/transportation_orders"
 	"tms-data-generator/generator/vehicles"
 )
@@ -49,6 +50,7 @@ func Generate(outputFile string) error {
 	var vehiclesStatements string
 	var driversStatements string
 	var customersStatements string
+	var shipmentsStatements string
 	wg := sync.WaitGroup{}
 
 	start := time.Now() // Start timing
@@ -105,7 +107,16 @@ func Generate(outputFile string) error {
 	timelineEvents := transportation_orders.GenerateOrderTimelineEvents(ordersList)
 	fmt.Println("done generating timeline events", time.Now(), time.Since(startTimeline))
 
-	// Phase 6: Generate SQL statements
+	// Phase 6: Generate shipments (depends on orders, drivers, vehicles)
+	startShipments := time.Now()
+	fmt.Println("Generating shipments...", time.Now())
+	driversList := drivers.GenerateDrivers(config.DRIVERS)
+	vehiclesList := vehicles.GenerateVehicles(config.VEHICLES)
+	shipmentsList := shipments.GenerateShipments(ordersList, driversList, vehiclesList)
+	shipmentsStatements = shipments.GenerateInsertStatements(shipmentsList)
+	fmt.Println("done generating shipments", time.Now(), time.Since(startShipments))
+
+	// Phase 7: Generate SQL statements
 	startSQL := time.Now()
 	fmt.Println("Generating SQL statements...", time.Now())
 	ordersStatements := transportation_orders.GenerateInsertStatements(ordersList)
@@ -127,6 +138,7 @@ func Generate(outputFile string) error {
 	sb.WriteString(ordersStatements)
 	sb.WriteString(timelineStatements)
 	sb.WriteString(itemsStatements)
+	sb.WriteString(shipmentsStatements)
 
 	err = os.WriteFile(outputFile, []byte(sb.String()), 0644)
 	if err != nil {

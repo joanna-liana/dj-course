@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS shipments;
 DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS order_timeline_events;
 DROP TABLE IF EXISTS transportation_orders;
@@ -72,7 +73,34 @@ CREATE TABLE order_items (
     FOREIGN KEY (order_id) REFERENCES transportation_orders(id)
 );
 
+CREATE TABLE shipments (
+    id INT PRIMARY KEY,
+    order_id INT NOT NULL,
+    driver_id INT NOT NULL,
+    vehicle_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    scheduled_start TIMESTAMP NOT NULL,
+    scheduled_end TIMESTAMP NOT NULL,
+    actual_start TIMESTAMP,
+    actual_end TIMESTAMP,
+    pickup_location VARCHAR(255) NOT NULL,
+    delivery_location VARCHAR(255) NOT NULL,
+    distance_km DECIMAL(6,2) NOT NULL,
+    notes TEXT,
+    FOREIGN KEY (order_id) REFERENCES transportation_orders(id),
+    FOREIGN KEY (driver_id) REFERENCES drivers(id),
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
+    CONSTRAINT check_scheduled_times CHECK (scheduled_end > scheduled_start),
+    CONSTRAINT check_actual_times CHECK (actual_end IS NULL OR actual_start IS NOT NULL),
+    CONSTRAINT check_actual_after_scheduled CHECK (actual_start IS NULL OR actual_start >= scheduled_start)
+);
+
 CREATE INDEX idx_timeline_order ON order_timeline_events(order_id);
 CREATE INDEX idx_items_order ON order_items(order_id);
 CREATE INDEX idx_orders_customer ON transportation_orders(customer_id);
 CREATE INDEX idx_orders_status ON transportation_orders(status);
+CREATE INDEX idx_shipments_order ON shipments(order_id);
+CREATE INDEX idx_shipments_driver ON shipments(driver_id);
+CREATE INDEX idx_shipments_vehicle ON shipments(vehicle_id);
+CREATE INDEX idx_shipments_status ON shipments(status);
+CREATE INDEX idx_shipments_scheduled ON shipments(scheduled_start, scheduled_end);

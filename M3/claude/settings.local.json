@@ -3,7 +3,9 @@
     "allow": [
       "Bash(task run)",
       "Bash(mkdir:*)",
-      "Bash(/Users/tomaszku/Development/devstyle/DJ/dj-course-official/M3/tms-data-generator/plans/transportation-order-implementation.md)"
+      "Bash(/Users/tomaszku/Development/devstyle/DJ/dj-course-official/M3/tms-data-generator/plans/transportation-order-implementation.md)",
+      "Bash(go run:*)",
+      "Bash(__NEW_LINE__ echo \"=== IMPLEMENTATION VERIFICATION ===\" echo \"\" echo \"Files created/modified:\" echo \"\" echo \"1. generator/shipments/model.go:\" ls -lh /home/asiek/Projects/dj/dj-course/M3/tms-data-generator/generator/shipments/model.go)"
     ],
     "deny": [],
     "ask": []
