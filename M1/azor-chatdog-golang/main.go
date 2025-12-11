@@ -19,6 +19,9 @@ func main() {
 
 	// Initialize chat
 	if err := InitChat(); err != nil {
+		println("\n❌ Błąd inicjalizacji:", err.Error())
+		println("\n💡 Sprawdź czy masz plik .env z GEMINI_API_KEY.")
+		println("   Użyj: task env  (lub: cp .env.example .env)")
 		os.Exit(1)
 	}
 

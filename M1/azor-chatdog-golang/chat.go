@@ -18,9 +18,17 @@ func InitChat() error {
 	cliSessionID := cli.GetSessionIDFromCLI()
 	sess, err := manager.InitializeFromCLI(cliSessionID)
 
-	if err != nil && cliSessionID != "" {
-		cli.PrintError(fmt.Sprintf("Błąd wczytywania sesji: %v", err))
-		cli.PrintInfo(fmt.Sprintf("Rozpoczęto nową sesję z ID: %s", sess.SessionID()))
+	if err != nil {
+		if cliSessionID != "" {
+			cli.PrintError(fmt.Sprintf("Błąd wczytywania sesji: %v", err))
+			if sess != nil {
+				cli.PrintInfo(fmt.Sprintf("Rozpoczęto nową sesję z ID: %s", sess.SessionID()))
+			} else {
+				return fmt.Errorf("nie udało się zainicjalizować sesji: %w", err)
+			}
+		} else {
+			return fmt.Errorf("nie udało się utworzyć nowej sesji: %w", err)
+		}
 	}
 
 	cli.DisplayHelp(sess.SessionID())

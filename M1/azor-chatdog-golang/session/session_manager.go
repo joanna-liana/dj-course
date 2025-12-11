@@ -116,21 +116,25 @@ func (sm *SessionManager) RemoveCurrentSessionAndCreateNew() (*ChatSession, stri
 
 // InitializeFromCLI initializes session from CLI arguments
 func (sm *SessionManager) InitializeFromCLI(cliSessionID string) (*ChatSession, error) {
-	if cliSessionID != "" {
-		asst := assistant.CreateAzorAssistant()
-		session, err := LoadFromFile(asst, cliSessionID)
+	asst := assistant.CreateAzorAssistant()
 
+	if cliSessionID != "" {
+		session, err := LoadFromFile(asst, cliSessionID)
 		if err != nil {
 			// Fallback to new session
-			session, _ = NewChatSession(asst, "", []llm.Message{})
+			session, newErr := NewChatSession(asst, "", []llm.Message{})
+			if newErr != nil {
+				return nil, newErr
+			}
+			sm.currentSession = session
+			return session, err
 		}
 
 		sm.currentSession = session
-		return session, err
+		return session, nil
 	}
 
 	// Create new session
-	asst := assistant.CreateAzorAssistant()
 	session, err := NewChatSession(asst, "", []llm.Message{})
 	if err != nil {
 		return nil, err
