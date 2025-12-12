@@ -104,7 +104,29 @@ func handleSessionSubcommand(subcommand string, manager *session.SessionManager)
 
 	switch subcommand {
 	case "list":
-		commands.ListSessionsCommand()
+		sessionID, ok := commands.InteractiveListSessionsCommand()
+		if ok && sessionID != "" {
+			if sessionID == current.SessionID() {
+				cli.PrintInfo("Jesteś już w tej sesji.")
+			} else {
+				newSession, saveAttempted, previousSessionID, loadSuccessful, loadError, hasHistory := manager.SwitchToSession(sessionID)
+
+				if saveAttempted {
+					cli.PrintInfo(fmt.Sprintf("\nZapisuję bieżącą sesję: %s...", previousSessionID))
+				}
+
+				if !loadSuccessful {
+					cli.PrintError(fmt.Sprintf("Nie można wczytać sesji o ID: %s. %v", sessionID, loadError))
+				} else {
+					cli.PrintInfo(fmt.Sprintf("\n--- Przełączono na sesję: %s ---", newSession.SessionID()))
+					cli.DisplayHelp(newSession.SessionID())
+
+					if hasHistory {
+						commands.DisplayHistorySummary(newSession.GetHistory(), newSession.AssistantName())
+					}
+				}
+			}
+		}
 
 	case "display":
 		commands.DisplayFullSession(current.GetHistory(), current.SessionID(), current.AssistantName())
