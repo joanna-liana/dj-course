@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2025-12-12T10:00:00.000000Z",
+    "session_id": "test-session-1",
+    "model": "gemini-2.5-flash",
+    "prompt": "Hello",
+    "response": "Hi there!",
+    "tokens_used": 50
+  },
+  {
+    "timestamp": "2025-12-12T11:00:00.000000Z",
+    "session_id": "test-session-2",
+    "model": "llama-3.3-70b",
+    "prompt": "What is AI?",
+    "response": "AI stands for Artificial Intelligence.",
+    "tokens_used": 75
+  },
+  {
+    "timestamp": "2025-12-12T11:00:02.000000Z",
+    "session_id": "test-session-2",
+    "model": "llama-3.3-70b",
+    "prompt": "Tell me more",
+    "response": "It's a field of computer science...",
+    "tokens_used": 120
+  }
+]

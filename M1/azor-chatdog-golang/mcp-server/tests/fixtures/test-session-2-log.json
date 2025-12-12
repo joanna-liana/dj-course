@@ -1,0 +1,27 @@
+{
+  "session_id": "test-session-2",
+  "model": "llama-3.3-70b",
+  "system_role": "Another test system prompt",
+  "history": [
+    {
+      "role": "user",
+      "timestamp": "2025-12-12T11:00:00.000000",
+      "text": "What is AI?"
+    },
+    {
+      "role": "model",
+      "timestamp": "2025-12-12T11:00:01.000000",
+      "text": "AI stands for Artificial Intelligence."
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-12-12T11:00:02.000000",
+      "text": "Tell me more"
+    },
+    {
+      "role": "model",
+      "timestamp": "2025-12-12T11:00:03.000000",
+      "text": "It's a field of computer science..."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "session_id": "test-session-1",
+  "model": "gemini-2.5-flash",
+  "system_role": "Test system prompt",
+  "history": [
+    {
+      "role": "user",
+      "timestamp": "2025-12-12T10:00:00.000000",
+      "text": "Hello"
+    },
+    {
+      "role": "model",
+      "timestamp": "2025-12-12T10:00:01.000000",
+      "text": "Hi there!"
+    }
+  ]
+}

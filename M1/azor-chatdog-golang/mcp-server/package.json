@@ -1,0 +1,33 @@
+{
+  "name": "azor-chatdog-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Azor Chatdog session management",
+  "type": "module",
+  "bin": {
+    "azor-mcp-server": "./build/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x build/src/index.js",
+    "dev": "tsc --watch",
+    "test": "node --test build/tests/*.test.js",
+    "test:watch": "node --test --watch build/tests/*.test.js",
+    "lint": "eslint src/**/*.ts"
+  },
+  "files": [
+    "build"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "eslint": "^9.18.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
