@@ -4,9 +4,12 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
+  ListToolsRequestSchema,
+  CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { SessionReader } from "./session-reader.js";
 import { ResourceHandlers } from "./resources.js";
+import { ToolHandlers } from "./tools.js";
 
 const server = new Server(
   {
@@ -16,12 +19,14 @@ const server = new Server(
   {
     capabilities: {
       resources: {},
+      tools: {},
     },
   }
 );
 
 const sessionReader = new SessionReader();
 const resourceHandlers = new ResourceHandlers(sessionReader);
+const toolHandlers = new ToolHandlers(sessionReader);
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
   return resourceHandlers.listResources();
@@ -29,6 +34,14 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
 
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   return resourceHandlers.readResource(request);
+});
+
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  return toolHandlers.listTools();
+});
+
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  return toolHandlers.callTool(request);
 });
 
 async function main() {

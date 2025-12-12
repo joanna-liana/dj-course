@@ -62,6 +62,18 @@ npm run lint       # Lint code
 - `azor://session/list` - All sessions metadata
 - `azor://session/{session-id}` - Full conversation history
 
+## MCP Tools
+
+**list_sessions**
+- Lists all sessions with last update date, message count, and model
+- No arguments required
+- Returns formatted text output
+
+**get_session**
+- Retrieves full conversation history for a specific session
+- Arguments: `session_id` (string)
+- Returns JSON with summary and full conversation
+
 ## Session Directory
 
 Default: `~/.azor/`
