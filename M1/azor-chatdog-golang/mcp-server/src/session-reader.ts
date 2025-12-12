@@ -1,4 +1,4 @@
-import { readdir, readFile } from "fs/promises";
+import { readdir, readFile, unlink } from "fs/promises";
 import { join } from "path";
 import { CONFIG } from "./config.js";
 import type {
@@ -96,5 +96,10 @@ export class SessionReader {
       this.getSessionMetadata(id)
     );
     return Promise.all(metadataPromises);
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    const filePath = join(CONFIG.sessionDir, `${sessionId}-log.json`);
+    await unlink(filePath);
   }
 }

@@ -32,6 +32,21 @@ export class ToolHandlers {
             required: ["session_id"],
           },
         },
+        {
+          name: "delete_session",
+          description:
+            "Delete a session from the chatdog storage (WARNING: This permanently removes the session file)",
+          inputSchema: {
+            type: "object",
+            properties: {
+              session_id: {
+                type: "string",
+                description: "The session ID to delete",
+              },
+            },
+            required: ["session_id"],
+          },
+        },
       ],
     };
   }
@@ -87,6 +102,24 @@ export class ToolHandlers {
                 null,
                 2
               ),
+            },
+          ],
+        };
+      }
+
+      case "delete_session": {
+        const sessionId = (args as any).session_id;
+        if (!sessionId) {
+          throw new Error("session_id is required");
+        }
+
+        await this.reader.deleteSession(sessionId);
+
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Session ${sessionId} has been deleted successfully`,
             },
           ],
         };

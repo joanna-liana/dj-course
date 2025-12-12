@@ -74,6 +74,12 @@ npm run lint       # Lint code
 - Arguments: `session_id` (string)
 - Returns JSON with summary and full conversation
 
+**delete_session**
+- Permanently deletes a session from storage
+- Arguments: `session_id` (string)
+- WARNING: This action cannot be undone
+- Returns confirmation message
+
 ## Session Directory
 
 Default: `~/.azor/`
