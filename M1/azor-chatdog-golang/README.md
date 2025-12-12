@@ -82,8 +82,7 @@ go build -o azor-chatdog .
 /exit             - Zakończenie czatu
 /quit             - Zakończenie czatu
 /help             - Wyświetla pomoc
-/switch <ID>      - Przełącz na inną sesję
-/session list     - Wyświetla listę sesji
+/session list     - Interaktywny wybór i przełączanie sesji (strzałki: nawigacja, Enter: wybór)
 /session display  - Wyświetla całą historię
 /session pop      - Usuwa ostatnią wymianę
 /session clear    - Czyści historię
@@ -95,9 +94,8 @@ go build -o azor-chatdog .
 ### Autocompletion
 
 Po wpisaniu `/` i naciśnięciu **Tab**, pojawią się podpowiedzi:
-- Slash commands (`/help`, `/session`, `/switch`, etc.)
+- Slash commands (`/help`, `/session`, etc.)
 - Subkomendy dla `/session` (`list`, `display`, `pop`, etc.)
-- ID sesji dla `/switch` (dynamicznie pobrane z `~/.azor/`)
 
 **Klawisze:**
 - `Tab` / `Ctrl+I` - Pokaż/przełącz podpowiedzi
@@ -135,10 +133,11 @@ Struktura projektu:
 
 ✅ **Zaimplementowane:**
 - Pełne wsparcie dla Google Gemini API
-- Zarządzanie sesjami (tworzenie, przełączanie, zapisywanie, usuwanie)
+- Zarządzanie sesjami (tworzenie, zapisywanie, usuwanie)
+- **Interaktywny wybór sesji** z nawigacją strzałkami
 - Historia konwersacji
 - Write-Ahead Log (WAL)
-- Wszystkie slash commands (/exit, /quit, /help, /switch, /session)
+- Wszystkie slash commands (/exit, /quit, /help, /session)
 - **Autocompletion komend** (Tab dla podpowiedzi)
 - Liczenie tokenów
 - Persystencja sesji w ~/.azor/

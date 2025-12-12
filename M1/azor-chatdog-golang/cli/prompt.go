@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"azor-chatdog/files"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
@@ -21,7 +20,6 @@ func completer(d prompt.Document) []prompt.Suggest {
 			{Text: "/help", Description: "Wyświetla pomoc"},
 			{Text: "/exit", Description: "Zakończenie czatu"},
 			{Text: "/quit", Description: "Zakończenie czatu"},
-			{Text: "/switch", Description: "Przełącz na inną sesję"},
 			{Text: "/session", Description: "Zarządzanie sesjami"},
 			{Text: "/pdf", Description: "Export do PDF"},
 		}
@@ -31,30 +29,13 @@ func completer(d prompt.Document) []prompt.Suggest {
 	if len(words) >= 1 && words[0] == "/session" {
 		if len(words) == 1 || (len(words) == 2 && !strings.HasSuffix(line, " ")) {
 			return []prompt.Suggest{
-				{Text: "list", Description: "Wyświetla listę sesji"},
+				{Text: "list", Description: "Interaktywny wybór sesji"},
 				{Text: "display", Description: "Wyświetla całą historię"},
 				{Text: "pop", Description: "Usuwa ostatnią wymianę"},
 				{Text: "clear", Description: "Czyści historię"},
 				{Text: "new", Description: "Rozpoczyna nową sesję"},
 				{Text: "remove", Description: "Usuwa bieżącą sesję"},
 			}
-		}
-	}
-
-	// If we have /switch command, suggest session IDs
-	if len(words) >= 1 && words[0] == "/switch" {
-		if len(words) == 1 || (len(words) == 2 && !strings.HasSuffix(line, " ")) {
-			sessions := files.ListSessions()
-			suggests := make([]prompt.Suggest, 0, len(sessions))
-			for _, s := range sessions {
-				if s.Error == "" {
-					suggests = append(suggests, prompt.Suggest{
-						Text:        s.ID,
-						Description: s.LastActivity,
-					})
-				}
-			}
-			return suggests
 		}
 	}
 

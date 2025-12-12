@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var validSlashCommands = []string{"/exit", "/quit", "/switch", "/help", "/session", "/pdf"}
+var validSlashCommands = []string{"/exit", "/quit", "/help", "/session", "/pdf"}
 
 // HandleCommand handles slash commands. Returns true if program should exit.
 func HandleCommand(userInput string) bool {
@@ -43,37 +43,6 @@ func HandleCommand(userInput string) bool {
 	if command == "/exit" || command == "/quit" {
 		cli.PrintInfo("\nZakończenie czatu. Uruchamianie procedury finalnego zapisu...")
 		return true
-	}
-
-	// Switch command
-	if command == "/switch" {
-		if len(parts) == 2 {
-			newID := parts[1]
-			current, _ := manager.GetCurrentSession()
-			if current != nil && newID == current.SessionID() {
-				cli.PrintInfo("Jesteś już w tej sesji.")
-			} else {
-				newSession, saveAttempted, previousSessionID, loadSuccessful, loadError, hasHistory := manager.SwitchToSession(newID)
-
-				if saveAttempted {
-					cli.PrintInfo(fmt.Sprintf("\nZapisuję bieżącą sesję: %s...", previousSessionID))
-				}
-
-				if !loadSuccessful {
-					cli.PrintError(fmt.Sprintf("Nie można wczytać sesji o ID: %s. %v", newID, loadError))
-				} else {
-					cli.PrintInfo(fmt.Sprintf("\n--- Przełączono na sesję: %s ---", newSession.SessionID()))
-					cli.DisplayHelp(newSession.SessionID())
-
-					if hasHistory {
-						commands.DisplayHistorySummary(newSession.GetHistory(), newSession.AssistantName())
-					}
-				}
-			}
-		} else {
-			cli.PrintError("Błąd: Użycie: /switch <SESSION-ID>")
-		}
-		return false
 	}
 
 	// Session subcommands

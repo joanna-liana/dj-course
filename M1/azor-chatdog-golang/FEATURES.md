@@ -9,13 +9,13 @@ Inteligentne podpowiedzi komend używając `go-prompt`:
 
 - **Slash commands** - Po wpisaniu `/` pokazuje wszystkie dostępne komendy
 - **Session subcommands** - Po `/session ` pokazuje: list, display, pop, clear, new, remove
-- **Dynamic session IDs** - Po `/switch ` pokazuje wszystkie dostępne sesje z datą ostatniej aktywności
+- **Interactive session selector** - `/session list` pokazuje interaktywną listę z nawigacją strzałkami
 
 **Użycie:**
 ```
 TY: /ses[TAB]          → autocomplete do /session
 TY: /session [TAB]     → pokazuje: list, display, pop, clear, new, remove
-TY: /switch [TAB]      → pokazuje listę session ID z datami
+TY: /session list      → interaktywna lista sesji (strzałki: nawigacja, Enter: wybór)
 ```
 
 ### 2. LLM Clients
@@ -90,7 +90,7 @@ TY: /switch [TAB]      → pokazuje listę session ID z datami
 ### 6. Commands
 **Lokalizacja:** `commands/`
 
-- `session_list.go` - Lista wszystkich sesji
+- `session_list.go` - Interaktywna lista sesji z nawigacją strzałkami
 - `session_display.go` - Wyświetlanie pełnej historii
 - `session_summary.go` - Podsumowanie sesji
 - `session_remove.go` - Usuwanie sesji

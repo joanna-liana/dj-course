@@ -82,7 +82,7 @@ Get free API key: https://cloud.cerebras.ai
   - `llama_client.go` - LLaMA stub (needs llama.cpp bindings)
 - `session/` - Session persistence and management
   - `chat_session.go` - Individual chat session logic
-  - `session_manager.go` - Session lifecycle (create, switch, load, save)
+  - `session_manager.go` - Session lifecycle (create, load, save)
 - `cli/` - User interface
   - `console.go` - Colorized terminal output
   - `prompt.go` - Interactive input with tab completion
@@ -122,8 +122,7 @@ Sessions saved to `~/.azor/`:
 /exit             - Exit chat
 /quit             - Exit chat
 /help             - Show help
-/switch <ID>      - Switch to another session
-/session list     - List all sessions
+/session list     - Interactive session selector (use arrows to navigate, Enter to switch)
 /session display  - Show full history
 /session pop      - Remove last exchange
 /session clear    - Clear history
@@ -136,7 +135,8 @@ Sessions saved to `~/.azor/`:
 
 **Complete:**
 - Google Gemini API integration
-- Session management (create, load, save, switch, delete)
+- Session management (create, load, save, delete)
+- Interactive session selector with arrow key navigation
 - Conversation history and WAL
 - Tab completion for commands
 - Token counting
