@@ -122,7 +122,29 @@ Sessions saved to `~/.azor/`:
 
 ## Clarifying Questions
 
-When AZOR detects an unclear or ambiguous prompt, it will automatically ask for clarification:
+When AZOR detects a **genuinely vague or unclear** prompt, it will automatically ask for clarification:
+
+**AZOR asks for clarification ONLY when:**
+- You use pronouns without context: "fix it", "change that", "what about this?"
+- Your request is too general: "help me", "what should I do?"
+- Critical information is missing to complete the task
+
+**AZOR does NOT ask for clarification when:**
+- Your request is specific and actionable
+- You ask a direct question that needs an explanation
+- The response would be a list of steps or suggestions (uses bullet points instead)
+
+**Examples:**
+
+Will trigger clarification:
+- ❌ "fix it" (what needs fixing?)
+- ❌ "help" (help with what?)
+- ❌ "co z tym?" (what about what?)
+
+Will NOT trigger clarification:
+- ✅ "how do I fix a memory leak in Go?"
+- ✅ "what are the best practices for error handling?"
+- ✅ "list all sessions"
 
 **How it works:**
 1. AZOR presents a question with 2-4 numbered options plus "Inne (wpisz własną odpowiedź)"
