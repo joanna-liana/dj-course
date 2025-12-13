@@ -484,6 +484,71 @@ function stopEngineRevSound() {
     }, 200);
 }
 
+// Dźwięk turbo (layered engine vroom)
+let turboOscillator1 = null;
+let turboOscillator2 = null;
+let turboGain = null;
+
+function startTurboSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    if (turboOscillator1) return;
+
+    // Low rumble
+    turboOscillator1 = audioCtx.createOscillator();
+    turboOscillator1.type = 'sawtooth';
+    turboOscillator1.frequency.setValueAtTime(65, audioCtx.currentTime);
+
+    // Mid-range growl
+    turboOscillator2 = audioCtx.createOscillator();
+    turboOscillator2.type = 'sawtooth';
+    turboOscillator2.frequency.setValueAtTime(130, audioCtx.currentTime);
+
+    turboGain = audioCtx.createGain();
+    turboGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    turboGain.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 0.15);
+
+    turboOscillator1.connect(turboGain);
+    turboOscillator2.connect(turboGain);
+    turboGain.connect(audioCtx.destination);
+
+    turboOscillator1.start();
+    turboOscillator2.start();
+}
+
+function updateTurboSound(speed) {
+    if (!turboOscillator1 || !turboOscillator2 || !turboGain) return;
+
+    const now = audioCtx.currentTime;
+    const baseFreq1 = 65 + Math.abs(speed) * 3;
+    const baseFreq2 = 130 + Math.abs(speed) * 6;
+
+    turboOscillator1.frequency.setValueAtTime(baseFreq1, now);
+    turboOscillator2.frequency.setValueAtTime(baseFreq2, now);
+}
+
+function stopTurboSound() {
+    if (!turboOscillator1 || !turboOscillator2 || !turboGain) return;
+
+    const now = audioCtx.currentTime;
+    const osc1 = turboOscillator1;
+    const osc2 = turboOscillator2;
+    const gain = turboGain;
+
+    // Clear immediately so new sound can start
+    turboOscillator1 = null;
+    turboOscillator2 = null;
+    turboGain = null;
+
+    // Fade out and stop
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+
+    setTimeout(() => {
+        osc1.stop();
+        osc2.stop();
+    }, 350);
+}
+
 
 function playLevelCompleteSound() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -1120,6 +1185,17 @@ class PlayerCar {
             return p.life > 0;
         });
 
+        // Turbo sound control
+        if (this.isTurboActive && Math.abs(this.speed) > 1) {
+            if (!turboOscillator1) {
+                startTurboSound();
+            } else {
+                updateTurboSound(this.speed);
+            }
+        } else if (turboOscillator1) {
+            stopTurboSound();
+        }
+
         // === HAMULEC RĘCZNY - STARTOWANIE ===
         const isHandbraking = input.keys.Space;
         const isThrottling = input.keys.ArrowUp || input.keys.ArrowDown;
@@ -1272,6 +1348,17 @@ class PlayerCar {
             p.life -= deltaTime * 2;
             return p.life > 0;
         });
+
+        // Turbo sound control
+        if (this.isTurboActive && Math.abs(this.speed) > 1) {
+            if (!turboOscillator1) {
+                startTurboSound();
+            } else {
+                updateTurboSound(this.speed);
+            }
+        } else if (turboOscillator1) {
+            stopTurboSound();
+        }
 
         // === HAMULEC RĘCZNY - STARTOWANIE ===
         const isHandbraking = input.keys.Space;
