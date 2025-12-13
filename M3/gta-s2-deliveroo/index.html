@@ -1497,13 +1497,18 @@ class PlayerCar {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
 
-        // Symmetrical positions for wheels and lights
-        const wheelCenterY = 15;
-        const wheelTopY_L = -wheelCenterY - CONFIG.wheelWidth / 2;
-        const wheelTopY_R = wheelCenterY - CONFIG.wheelWidth / 2;
+        // Scale wheels and lights proportionally to vehicle size
+        const vehicleScale = this.w / CONFIG.carWidth;
+        const wheelWidth = CONFIG.wheelWidth * vehicleScale;
+        const wheelLength = CONFIG.wheelLength * vehicleScale;
 
-        const headlightCenterY = 12;
-        const headlightHeight = 10;
+        // Symmetrical positions for wheels and lights
+        const wheelCenterY = this.w / 3;
+        const wheelTopY_L = -wheelCenterY - wheelWidth / 2;
+        const wheelTopY_R = wheelCenterY - wheelWidth / 2;
+
+        const headlightCenterY = this.w / 3.5;
+        const headlightHeight = 10 * vehicleScale;
         const headlightTopY_L = -headlightCenterY - headlightHeight / 2;
         const headlightTopY_R = headlightCenterY - headlightHeight / 2;
 
@@ -1516,20 +1521,20 @@ class PlayerCar {
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            
+
             const steer = this.steeringAngle;
-            const wx = CONFIG.wheelBase/2;
-            
+            const wx = this.wheelBase/2;
+
             // Left Wheel projection
             let wy_L = -wheelCenterY;
             ctx.moveTo(wx, wy_L);
             ctx.lineTo(wx + Math.cos(steer)*100, wy_L + Math.sin(steer)*100);
-            
+
             // Right Wheel projection
             let wy_R = wheelCenterY;
             ctx.moveTo(wx, wy_R);
             ctx.lineTo(wx + Math.cos(steer)*100, wy_R + Math.sin(steer)*100);
-            
+
             ctx.stroke();
             ctx.restore();
         }
@@ -1537,16 +1542,16 @@ class PlayerCar {
         // --- WHEELS ---
         ctx.fillStyle = '#222';
         // Rear
-        this.drawWheel(ctx, -CONFIG.wheelBase/2, wheelTopY_L, 0);
-        this.drawWheel(ctx, -CONFIG.wheelBase/2, wheelTopY_R, 0);
+        this.drawWheel(ctx, -this.wheelBase/2, wheelTopY_L, 0, wheelLength, wheelWidth);
+        this.drawWheel(ctx, -this.wheelBase/2, wheelTopY_R, 0, wheelLength, wheelWidth);
         // Front
-        this.drawWheel(ctx, CONFIG.wheelBase/2, wheelTopY_L, this.steeringAngle);
-        this.drawWheel(ctx, CONFIG.wheelBase/2, wheelTopY_R, this.steeringAngle);
+        this.drawWheel(ctx, this.wheelBase/2, wheelTopY_L, this.steeringAngle, wheelLength, wheelWidth);
+        this.drawWheel(ctx, this.wheelBase/2, wheelTopY_R, this.steeringAngle, wheelLength, wheelWidth);
 
         // --- BODY ---
         ctx.fillStyle = '#3498db';
         ctx.beginPath();
-        ctx.roundRect(-CONFIG.carLength/2, -CONFIG.carWidth/2, CONFIG.carLength, CONFIG.carWidth, 6);
+        ctx.roundRect(-this.l/2, -this.w/2, this.l, this.w, 6 * vehicleScale);
         ctx.fill();
         ctx.strokeStyle = '#2980b9';
         ctx.lineWidth = 2;
@@ -1555,24 +1560,25 @@ class PlayerCar {
         // Roof
         ctx.fillStyle = '#85c1e9';
         ctx.beginPath();
-        ctx.roundRect(-CONFIG.carLength/4, -CONFIG.carWidth/2 + 6, CONFIG.carLength/2, CONFIG.carWidth - 12, 3);
+        ctx.roundRect(-this.l/4, -this.w/2 + 6 * vehicleScale, this.l/2, this.w - 12 * vehicleScale, 3 * vehicleScale);
         ctx.fill();
-        
+
         // Windshield indication (Front)
         ctx.fillStyle = 'rgba(255,255,255,0.3)';
-        ctx.fillRect(CONFIG.carLength/4, -CONFIG.carWidth/2 + 7, 5, CONFIG.carWidth - 14);
+        ctx.fillRect(this.l/4, -this.w/2 + 7 * vehicleScale, 5 * vehicleScale, this.w - 14 * vehicleScale);
 
         if (this.engineOn) {
             // Lights
             const isReversing = this.speed < -0.1; // Cofanie
             const isBraking = input.keys.Space || (this.speed > 0 && input.keys.ArrowDown) || (this.speed < 0 && input.keys.ArrowUp) || isReversing;
-            
+
             // Brake Lights (also light up when reversing)
+            const lightWidth = 3 * vehicleScale;
             ctx.fillStyle = isBraking ? '#ff0000' : '#8b0000';
             if(isBraking) { ctx.shadowColor = '#f00'; ctx.shadowBlur = 15; }
             ctx.beginPath();
-            ctx.rect(-CONFIG.carLength/2, headlightTopY_L, 3, headlightHeight);
-            ctx.rect(-CONFIG.carLength/2, headlightTopY_R, 3, headlightHeight);
+            ctx.rect(-this.l/2, headlightTopY_L, lightWidth, headlightHeight);
+            ctx.rect(-this.l/2, headlightTopY_R, lightWidth, headlightHeight);
             ctx.fill();
             ctx.shadowBlur = 0;
 
@@ -1585,24 +1591,25 @@ class PlayerCar {
                  const beamLength = 150;
                  const beamSpread = 60;
                  ctx.beginPath();
-                 ctx.moveTo(CONFIG.carLength/2, headlightTopY_L + headlightHeight/2);
-                 ctx.lineTo(CONFIG.carLength/2 + beamLength, (headlightTopY_L + headlightHeight/2) - beamSpread);
-                 ctx.lineTo(CONFIG.carLength/2 + beamLength, (headlightTopY_R + headlightHeight/2) + beamSpread);
-                 ctx.lineTo(CONFIG.carLength/2, headlightTopY_R + headlightHeight/2);
+                 ctx.moveTo(this.l/2, headlightTopY_L + headlightHeight/2);
+                 ctx.lineTo(this.l/2 + beamLength, (headlightTopY_L + headlightHeight/2) - beamSpread);
+                 ctx.lineTo(this.l/2 + beamLength, (headlightTopY_R + headlightHeight/2) + beamSpread);
+                 ctx.lineTo(this.l/2, headlightTopY_R + headlightHeight/2);
                  ctx.fill();
                  ctx.restore();
                  ctx.fillStyle = '#fff'; // Bright core
             }
             ctx.beginPath();
-            ctx.rect(CONFIG.carLength/2 - 2, headlightTopY_L, 2, headlightHeight);
-            ctx.rect(CONFIG.carLength/2 - 2, headlightTopY_R, 2, headlightHeight);
+            ctx.rect(this.l/2 - 2 * vehicleScale, headlightTopY_L, 2 * vehicleScale, headlightHeight);
+            ctx.rect(this.l/2 - 2 * vehicleScale, headlightTopY_R, 2 * vehicleScale, headlightHeight);
             ctx.fill();
         }
 
         // --- DELIVEROO TEXT ON ROOF ---
         ctx.save();
         ctx.fillStyle = '#000000'; // Black text
-        ctx.font = 'bold 12px Arial';
+        const fontSize = Math.max(8, 12 * vehicleScale);
+        ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         // Draw text along the roof (from back to front)
@@ -1612,16 +1619,17 @@ class PlayerCar {
         ctx.restore();
     }
 
-    drawWheel(ctx, x, y, angle) {
+    drawWheel(ctx, x, y, angle, wheelLength = CONFIG.wheelLength, wheelWidth = CONFIG.wheelWidth) {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle);
         // Tire tread
         ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(-CONFIG.wheelLength/2, 0, CONFIG.wheelLength, CONFIG.wheelWidth);
-        // Rim highlight
+        ctx.fillRect(-wheelLength/2, 0, wheelLength, wheelWidth);
+        // Rim highlight (scale with wheel)
+        const rimSize = Math.max(2, wheelLength / 5);
         ctx.fillStyle = '#555';
-        ctx.fillRect(-2, 2, 4, 6);
+        ctx.fillRect(-rimSize/2, wheelWidth/4, rimSize, wheelWidth/2);
         ctx.restore();
     }
 }
