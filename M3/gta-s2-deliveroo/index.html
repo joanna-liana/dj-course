@@ -2941,10 +2941,10 @@ class Game {
 
     getVehicleStatPercent(vehicle, stat) {
         const ranges = {
-            maxSpeed: { min: 12, max: 22 },
-            acceleration: { min: 0.04, max: 0.15 },
-            maxSteerAngle: { min: 0.55, max: 0.90 },
-            size: { min: 810, max: 5750 }
+            maxSpeed: { min: 8, max: 24 },
+            acceleration: { min: 0.02, max: 0.18 },
+            maxSteerAngle: { min: 0.50, max: 0.95 },
+            size: { min: 600, max: 6000 }
         };
 
         const range = ranges[stat];
