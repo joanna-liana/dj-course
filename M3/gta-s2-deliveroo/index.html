@@ -197,6 +197,7 @@
                 <button class="mode-btn" id="toggle-steering-mode" onclick="game.player.toggleSteeringMode()">Asystent Kierownicy: WŁ</button>
                 <button class="mode-btn" id="toggle-winter-mode" onclick="game.player.toggleWinterMode()">Poślizgi Zimowe: WYŁ</button>
                 <button class="mode-btn" id="toggle-music-btn" onclick="game.toggleBackgroundMusic()">Dźwięk: WŁ</button>
+                <button class="mode-btn" id="change-vehicle-btn" onclick="game.changeVehicle()">Zmień Pojazd</button>
             </div>
         </div>
     </div>
@@ -1682,6 +1683,10 @@ class Game {
             btn.innerText = 'Dźwięk: WYŁ';
         }
     }
+
+    changeVehicle() {
+        this.state = 'VEHICLE_SELECTION';
+    }
     
     defineLevels() {
         return [
@@ -2131,8 +2136,14 @@ class Game {
     }
 
     startGame() {
+        // If no vehicle selected, go to vehicle selection first
+        if (!localStorage.getItem('selectedVehicle')) {
+            this.state = 'VEHICLE_SELECTION';
+            return;
+        }
+        this.currentLevelIdx = 0;
+        this.loadLevel(0);
         this.state = 'RUNNING';
-        this.loadLevel(this.currentLevelIdx);
     }
 
     loadLevel(idx) {
