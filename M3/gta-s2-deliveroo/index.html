@@ -1643,6 +1643,13 @@ class Game {
         this.titleBlinkTimer = 0;
         this.titleButtonHover = false;
 
+        // Vehicle selection
+        this.selectionIndex = 0;
+        this.selectionVehicles = Object.keys(VEHICLE_TYPES);
+        this.leftArrowBounds = null;
+        this.rightArrowBounds = null;
+        this.confirmButtonBounds = null;
+
         this.updateUI();
     }
 
@@ -2346,6 +2353,13 @@ class Game {
             return;
         }
 
+        // Vehicle Selection Screen
+        if (this.state === 'VEHICLE_SELECTION') {
+            this.drawVehicleSelectionScreen();
+            ctx.restore();
+            return;
+        }
+
         // Level Complete Screen
         if (this.state === 'LEVEL_COMPLETE') {
             this.drawLevelCompleteScreen();
@@ -2726,6 +2740,212 @@ class Game {
         ctx.font = '12px Arial, sans-serif';
         ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
         ctx.fillText('© 1993 WARSZAFKA STUDIOS', canvas.width / 2, canvas.height - 30);
+    }
+
+    drawVehicleSelectionScreen() {
+        // Reuse 90s style background from title screen
+        this.titleTime += 0.016;
+
+        const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        const offset1 = Math.sin(this.titleTime * 0.5) * 0.5 + 0.5;
+        const offset2 = Math.cos(this.titleTime * 0.3) * 0.5 + 0.5;
+        grad.addColorStop(0, `rgb(${Math.floor(offset1 * 100)}, ${Math.floor(offset2 * 150 + 100)}, 200)`);
+        grad.addColorStop(0.5, `rgb(${Math.floor(offset2 * 150)}, 50, ${Math.floor(offset1 * 200 + 55)})`);
+        grad.addColorStop(1, `rgb(100, ${Math.floor(offset1 * 100)}, ${Math.floor(offset2 * 150 + 100)})`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Get current vehicle
+        const vehicleKey = this.selectionVehicles[this.selectionIndex];
+        const vehicle = VEHICLE_TYPES[vehicleKey];
+
+        // Title
+        ctx.font = 'bold 36px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#000';
+        ctx.fillText('WYBIERZ POJAZD', canvas.width / 2 + 2, 62);
+        ctx.fillStyle = '#ffff00';
+        ctx.fillText('WYBIERZ POJAZD', canvas.width / 2, 60);
+
+        // Vehicle name
+        ctx.font = 'bold 32px Arial';
+        ctx.fillStyle = '#000';
+        ctx.fillText(vehicle.name, canvas.width / 2 + 2, 122);
+        ctx.fillStyle = '#00ffff';
+        ctx.fillText(vehicle.name, canvas.width / 2, 120);
+
+        // Navigation arrows
+        const arrowY = 120;
+        const arrowSize = 40;
+
+        // Left arrow
+        const leftArrowX = canvas.width / 2 - 200;
+        this.leftArrowBounds = {x: leftArrowX - arrowSize/2, y: arrowY - arrowSize/2, width: arrowSize, height: arrowSize};
+        ctx.fillStyle = '#ff00ff';
+        ctx.beginPath();
+        ctx.moveTo(leftArrowX + arrowSize/2, arrowY);
+        ctx.lineTo(leftArrowX - arrowSize/2, arrowY);
+        ctx.lineTo(leftArrowX, arrowY - arrowSize/2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(leftArrowX + arrowSize/2, arrowY);
+        ctx.lineTo(leftArrowX - arrowSize/2, arrowY);
+        ctx.lineTo(leftArrowX, arrowY + arrowSize/2);
+        ctx.closePath();
+        ctx.fill();
+
+        // Right arrow
+        const rightArrowX = canvas.width / 2 + 200;
+        this.rightArrowBounds = {x: rightArrowX - arrowSize/2, y: arrowY - arrowSize/2, width: arrowSize, height: arrowSize};
+        ctx.fillStyle = '#ff00ff';
+        ctx.beginPath();
+        ctx.moveTo(rightArrowX - arrowSize/2, arrowY);
+        ctx.lineTo(rightArrowX + arrowSize/2, arrowY);
+        ctx.lineTo(rightArrowX, arrowY - arrowSize/2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(rightArrowX - arrowSize/2, arrowY);
+        ctx.lineTo(rightArrowX + arrowSize/2, arrowY);
+        ctx.lineTo(rightArrowX, arrowY + arrowSize/2);
+        ctx.closePath();
+        ctx.fill();
+
+        // Vehicle preview with animation
+        const previewY = canvas.height / 2 - 50;
+        const scale = 1.0 + Math.sin(this.titleTime * 2) * 0.05;
+
+        ctx.save();
+        ctx.translate(canvas.width / 2, previewY);
+        ctx.scale(scale, scale);
+        ctx.translate(-canvas.width / 2, -previewY);
+
+        const previewCar = new PlayerCar(canvas.width / 2, previewY, 90, vehicleKey);
+        previewCar.draw(ctx);
+
+        ctx.restore();
+
+        // Stats section
+        const statsY = previewY + 120;
+        const statsX = canvas.width / 2 - 200;
+        const barWidth = 400;
+        const barHeight = 25;
+        const barSpacing = 35;
+
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'left';
+
+        // Speed stat
+        const speedPercent = this.getVehicleStatPercent(vehicle, 'maxSpeed');
+        this.drawStatBar(statsX, statsY, 'Speed', speedPercent, barWidth, barHeight);
+
+        // Acceleration stat
+        const accelPercent = this.getVehicleStatPercent(vehicle, 'acceleration');
+        this.drawStatBar(statsX, statsY + barSpacing, 'Acceleration', accelPercent, barWidth, barHeight);
+
+        // Handling stat
+        const handlingPercent = this.getVehicleStatPercent(vehicle, 'maxSteerAngle');
+        this.drawStatBar(statsX, statsY + barSpacing * 2, 'Handling', handlingPercent, barWidth, barHeight);
+
+        // Size stat (inverted - smaller is better)
+        const sizePercent = 100 - this.getVehicleStatPercent(vehicle, 'size');
+        this.drawStatBar(statsX, statsY + barSpacing * 3, 'Maneuverability', sizePercent, barWidth, barHeight);
+
+        // Description
+        ctx.font = 'italic 18px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(vehicle.description, canvas.width / 2, statsY + barSpacing * 4 + 10);
+
+        // Confirm button
+        const buttonWidth = 240;
+        const buttonHeight = 50;
+        const buttonX = canvas.width / 2 - buttonWidth / 2;
+        const buttonY = canvas.height - 100;
+
+        this.confirmButtonBounds = {x: buttonX, y: buttonY, width: buttonWidth, height: buttonHeight};
+
+        // Button shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(buttonX + 4, buttonY + 4, buttonWidth, buttonHeight);
+
+        // Button background
+        const btnGrad = ctx.createLinearGradient(buttonX, buttonY, buttonX, buttonY + buttonHeight);
+        btnGrad.addColorStop(0, '#00ff00');
+        btnGrad.addColorStop(1, '#00aa00');
+        ctx.fillStyle = btnGrad;
+        ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+        // Button border
+        ctx.strokeStyle = '#ffff00';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+        // Button text
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#000';
+        ctx.fillText('POTWIERDŹ', canvas.width / 2 + 1, buttonY + buttonHeight / 2 + 1);
+        ctx.fillStyle = '#fff';
+        ctx.fillText('POTWIERDŹ', canvas.width / 2, buttonY + buttonHeight / 2);
+    }
+
+    getVehicleStatPercent(vehicle, stat) {
+        const ranges = {
+            maxSpeed: { min: 12, max: 22 },
+            acceleration: { min: 0.04, max: 0.15 },
+            maxSteerAngle: { min: 0.55, max: 0.90 },
+            size: { min: 810, max: 5750 }
+        };
+
+        const range = ranges[stat];
+        let value;
+
+        if (stat === 'size') {
+            value = vehicle.width * vehicle.length;
+        } else {
+            value = vehicle[stat];
+        }
+
+        return Math.round(((value - range.min) / (range.max - range.min)) * 100);
+    }
+
+    drawStatBar(x, y, label, percent, width, height) {
+        // Label
+        ctx.fillStyle = '#fff';
+        ctx.fillText(label + ':', x, y - 5);
+
+        // Background bar
+        ctx.fillStyle = '#333';
+        ctx.fillRect(x, y, width, height);
+
+        // Filled bar with gradient
+        const barGrad = ctx.createLinearGradient(x, y, x + width * (percent / 100), y);
+        if (percent < 33) {
+            barGrad.addColorStop(0, '#ff4444');
+            barGrad.addColorStop(1, '#ff8888');
+        } else if (percent < 66) {
+            barGrad.addColorStop(0, '#ffaa00');
+            barGrad.addColorStop(1, '#ffdd00');
+        } else {
+            barGrad.addColorStop(0, '#00ff00');
+            barGrad.addColorStop(1, '#88ff88');
+        }
+        ctx.fillStyle = barGrad;
+        ctx.fillRect(x, y, width * (percent / 100), height);
+
+        // Border
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+
+        // Percentage text
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(percent + '%', x + width + 40, y + height - 6);
+        ctx.textAlign = 'left';
     }
 
     drawLevelCompleteScreen() {
