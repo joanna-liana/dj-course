@@ -270,7 +270,93 @@ const CONFIG = {
     curbSafeSpeed: 1.5 // ~18 km/h. Below this, curbs bounce. Above, crash.
 };
 
+// --- VEHICLE TYPES ---
+const VEHICLE_TYPES = {
+    sedan: {
+        name: "Sedan",
+        width: 44,
+        length: 90,
+        wheelBase: 60,
+        maxSpeed: 18.0,
+        acceleration: 0.05,
+        maxSteerAngle: 0.65,
+        brakingForce: 0.5,
+        tireGrip: 0.85,
+        turboMultiplier: 1.4,
+        description: "Balanced handling"
+    },
+    suv: {
+        name: "SUV",
+        width: 50,
+        length: 115,
+        wheelBase: 75,
+        maxSpeed: 16.0,
+        acceleration: 0.04,
+        maxSteerAngle: 0.55,
+        brakingForce: 0.45,
+        tireGrip: 0.80,
+        turboMultiplier: 1.3,
+        description: "Large & stable"
+    },
+    compact: {
+        name: "Compact",
+        width: 40,
+        length: 80,
+        wheelBase: 55,
+        maxSpeed: 17.0,
+        acceleration: 0.055,
+        maxSteerAngle: 0.75,
+        brakingForce: 0.55,
+        tireGrip: 0.88,
+        turboMultiplier: 1.5,
+        description: "Nimble & easy"
+    },
+    sports: {
+        name: "Sports Car",
+        width: 42,
+        length: 95,
+        wheelBase: 62,
+        maxSpeed: 22.0,
+        acceleration: 0.15,
+        maxSteerAngle: 0.70,
+        brakingForce: 0.65,
+        tireGrip: 0.90,
+        turboMultiplier: 1.8,
+        description: "Fast & responsive"
+    },
+    bike: {
+        name: "Motorcycle",
+        width: 20,
+        length: 50,
+        wheelBase: 35,
+        maxSpeed: 20.0,
+        acceleration: 0.12,
+        maxSteerAngle: 0.85,
+        brakingForce: 0.60,
+        tireGrip: 0.75,
+        turboMultiplier: 1.7,
+        description: "Ultra-compact"
+    },
+    scooter: {
+        name: "Scooter",
+        width: 18,
+        length: 45,
+        wheelBase: 30,
+        maxSpeed: 12.0,
+        acceleration: 0.08,
+        maxSteerAngle: 0.90,
+        brakingForce: 0.50,
+        tireGrip: 0.70,
+        turboMultiplier: 1.6,
+        description: "Slowest but tiny"
+    }
+};
+
 // --- UTILS ---
+function saveVehicleSelection(vehicleType) {
+    localStorage.setItem('selectedVehicle', vehicleType);
+}
+
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playBonkSound() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -1533,18 +1619,19 @@ class Game {
         this.shakeTimer = 0;
         this.levels = [];
         this.currentLevelIdx = 0;
-        this.state = 'TITLE_SCREEN'; 
+        this.state = 'TITLE_SCREEN';
         this.bonkPos = {x:0, y:0};
+        this.selectedVehicle = localStorage.getItem('selectedVehicle') || 'sedan';
         this.player = new PlayerCar(0,0,0);
         this.currentParkingZones = [];
         this.isMusicOn = true;
-        
+
         // Title screen animation
         this.titleTime = 0;
         this.titlePressVisible = true;
         this.titleBlinkTimer = 0;
         this.titleButtonHover = false;
-        
+
         this.updateUI();
     }
 
