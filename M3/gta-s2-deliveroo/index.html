@@ -2192,6 +2192,43 @@ class Game {
             return;
         }
 
+        // Vehicle selection - keyboard navigation
+        if (this.state === 'VEHICLE_SELECTION') {
+            if (input.keys.ArrowLeft) {
+                if (!this.vehicleSelectionLeftPressed) {
+                    game.selectionIndex = (game.selectionIndex - 1 + game.selectionVehicles.length) % game.selectionVehicles.length;
+                    this.vehicleSelectionLeftPressed = true;
+                }
+            } else {
+                this.vehicleSelectionLeftPressed = false;
+            }
+
+            if (input.keys.ArrowRight) {
+                if (!this.vehicleSelectionRightPressed) {
+                    game.selectionIndex = (game.selectionIndex + 1) % game.selectionVehicles.length;
+                    this.vehicleSelectionRightPressed = true;
+                }
+            } else {
+                this.vehicleSelectionRightPressed = false;
+            }
+
+            if (input.keys.Enter) {
+                if (!this.vehicleSelectionEnterPressed) {
+                    const selectedType = game.selectionVehicles[game.selectionIndex];
+                    game.selectedVehicle = selectedType;
+                    saveVehicleSelection(selectedType);
+                    game.player.vehicleType = selectedType;
+                    game.player.reset(0, 0, 0);
+                    game.currentLevelIdx = 0;
+                    game.loadLevel(0);
+                    this.vehicleSelectionEnterPressed = true;
+                }
+            } else {
+                this.vehicleSelectionEnterPressed = false;
+            }
+            return;
+        }
+
         if (this.state === 'GAMEOVER' || this.state === 'LEVEL_COMPLETE') return;
 
         if (this.shakeTimer > 0) this.shakeTimer -= deltaTime * 60; // Convert to frame-based (60 FPS equivalent)
@@ -3185,6 +3222,32 @@ canvas.addEventListener('mousemove', (e) => {
         );
         canvas.style.cursor = game.titleButtonHover ? 'pointer' : 'default';
     }
+    // Vehicle selection buttons
+    else if (game.state === 'VEHICLE_SELECTION') {
+        let hover = false;
+        if (game.leftArrowBounds) {
+            const btn = game.leftArrowBounds;
+            if (mouseX >= btn.x && mouseX <= btn.x + btn.width &&
+                mouseY >= btn.y && mouseY <= btn.y + btn.height) {
+                hover = true;
+            }
+        }
+        if (game.rightArrowBounds) {
+            const btn = game.rightArrowBounds;
+            if (mouseX >= btn.x && mouseX <= btn.x + btn.width &&
+                mouseY >= btn.y && mouseY <= btn.y + btn.height) {
+                hover = true;
+            }
+        }
+        if (game.confirmButtonBounds) {
+            const btn = game.confirmButtonBounds;
+            if (mouseX >= btn.x && mouseX <= btn.x + btn.width &&
+                mouseY >= btn.y && mouseY <= btn.y + btn.height) {
+                hover = true;
+            }
+        }
+        canvas.style.cursor = hover ? 'pointer' : 'default';
+    }
     // Level complete button
     else if (game.state === 'LEVEL_COMPLETE' && game.levelCompleteButtonBounds) {
         const btn = game.levelCompleteButtonBounds;
@@ -3220,7 +3283,43 @@ canvas.addEventListener('click', (e) => {
             game.startGame();
         }
     }
-    
+
+    // Vehicle selection buttons
+    if (game.state === 'VEHICLE_SELECTION') {
+        // Left arrow
+        if (game.leftArrowBounds) {
+            const btn = game.leftArrowBounds;
+            if (mouseX >= btn.x && mouseX <= btn.x + btn.width &&
+                mouseY >= btn.y && mouseY <= btn.y + btn.height) {
+                game.selectionIndex = (game.selectionIndex - 1 + game.selectionVehicles.length) % game.selectionVehicles.length;
+            }
+        }
+
+        // Right arrow
+        if (game.rightArrowBounds) {
+            const btn = game.rightArrowBounds;
+            if (mouseX >= btn.x && mouseX <= btn.x + btn.width &&
+                mouseY >= btn.y && mouseY <= btn.y + btn.height) {
+                game.selectionIndex = (game.selectionIndex + 1) % game.selectionVehicles.length;
+            }
+        }
+
+        // Confirm button
+        if (game.confirmButtonBounds) {
+            const btn = game.confirmButtonBounds;
+            if (mouseX >= btn.x && mouseX <= btn.x + btn.width &&
+                mouseY >= btn.y && mouseY <= btn.y + btn.height) {
+                const selectedType = game.selectionVehicles[game.selectionIndex];
+                game.selectedVehicle = selectedType;
+                saveVehicleSelection(selectedType);
+                game.player.vehicleType = selectedType;
+                game.player.reset(0, 0, 0);
+                game.currentLevelIdx = 0;
+                game.loadLevel(0);
+            }
+        }
+    }
+
     // Level complete button
     if (game.state === 'LEVEL_COMPLETE' && game.levelCompleteButtonBounds) {
         const btn = game.levelCompleteButtonBounds;
