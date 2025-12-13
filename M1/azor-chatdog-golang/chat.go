@@ -101,10 +101,12 @@ func MainLoop() {
 			clarificationCount++
 
 			cli.PrintAssistant(fmt.Sprintf("\n%s: %s", sess.AssistantName(), clarifyQ.Question))
+			cli.PrintInfo("\n💡 Twoje pytanie jest niejednoznaczne. Wybierz opcję:\n")
 
-			selected, ok := cli.SelectOption("Wybierz opcję (ESC aby pominąć):", clarifyQ.Options)
+			optionsWithCustom := append(clarifyQ.Options, "Inne (wpisz własną odpowiedź)")
+			selected, ok := cli.SelectOption("", optionsWithCustom)
 
-			if !ok {
+			if !ok || selected == "Inne (wpisz własną odpowiedź)" {
 				cli.PrintInfo("\nPodaj swoją odpowiedź:")
 				selected, err = cli.GetUserInput("TY: ")
 				if err == io.EOF {

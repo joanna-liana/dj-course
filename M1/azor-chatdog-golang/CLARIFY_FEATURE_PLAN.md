@@ -203,10 +203,10 @@ Clarifying Questions:
    - Graceful fallback if selector crashes
    - Show raw response if parsing fails unexpectedly
 
-3. **Visual improvements:**
-   - Color-code option numbers (cyan)
-   - Show "Escape to type your own" hint in selector
-   - Add subtle separator between question and options
+3. **Visual improvements:** ✅ DONE
+   - Color-code option numbers (cyan) ✅
+   - Show "ESC: wpisz własną odpowiedź" hint in selector ✅
+   - Add explanation message before selector: "💡 Twoje pytanie jest niejednoznaczne..." ✅
 
 4. **Documentation:**
    - Update `CLAUDE.md` with clarification feature

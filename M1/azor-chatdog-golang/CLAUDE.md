@@ -125,10 +125,10 @@ Sessions saved to `~/.azor/`:
 When AZOR detects an unclear or ambiguous prompt, it will automatically ask for clarification:
 
 **How it works:**
-1. AZOR presents a question with 2-4 numbered options
+1. AZOR presents a question with 2-4 numbered options plus "Inne (wpisz własną odpowiedź)"
 2. Use arrow keys (↑/↓) to navigate options
 3. Press Enter to select
-4. Press Escape to skip selection and type a custom response instead
+4. Select the last option OR press Escape to type a custom response
 
 **Example interaction:**
 ```
@@ -136,16 +136,20 @@ TY: fix it
 
 AZOR: Potrzebuję wyjaśnienia. Co chcesz naprawić?
 
+💡 Twoje pytanie jest niejednoznaczne. Wybierz opcję:
+
+Strzałki: ↑↓ nawigacja | Enter: wybierz | ESC: wpisz własną odpowiedź
+
 → 1. Naprawić błąd w kodzie
   2. Naprawić konfigurację
   3. Naprawić dokumentację
-
-Wybierz opcję (ESC aby pominąć):
+  4. Inne (wpisz własną odpowiedź)
 ```
 
 **Features:**
 - Maximum 2 clarifying questions per message (prevents endless loops)
-- Escape key allows free-form text input as alternative to selection
+- "Inne (wpisz własną odpowiedź)" option always available as last choice
+- Escape key also allows free-form text input
 - All LLM engines supported (Gemini, Cerebras, LLaMA)
 
 **Technical Details:**

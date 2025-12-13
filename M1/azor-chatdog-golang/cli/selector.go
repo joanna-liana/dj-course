@@ -62,8 +62,10 @@ func clearScreen() {
 
 func displayOptions(prompt string, options []string, selectedIndex int) {
 	clearScreen()
-	fmt.Printf("\n%s\n", prompt)
-	fmt.Println("Strzałki: nawigacja | Enter: wybierz | ESC: anuluj")
+	if prompt != "" {
+		fmt.Printf("\n%s\n", prompt)
+	}
+	fmt.Println("Strzałki: ↑↓ nawigacja | Enter: wybierz | ESC: wpisz własną odpowiedź")
 
 	for i, option := range options {
 		if i == selectedIndex {
