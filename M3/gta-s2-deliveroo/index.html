@@ -175,6 +175,7 @@
             <div><kbd>↓</kbd> Wsteczny</div>
             <div><kbd>←</kbd> <kbd>→</kbd> Kierownica (Precyzyjna)</div>
             <div><kbd>Spacja</kbd> Hamulec</div>
+            <div><kbd>Shift</kbd> Turbo</div>
         </div>
     </div>
 
@@ -575,16 +576,25 @@ function isPointInRotatedRect(point, rect) {
 
 class InputHandler {
     constructor() {
-        this.keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, Space: false, Enter: false };
+        this.keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, Space: false, Enter: false, ShiftLeft: false, ShiftRight: false };
         window.addEventListener('keydown', (e) => {
             const code = e.code === 'Space' ? 'Space' : e.code;
             if (this.keys.hasOwnProperty(code)) { this.keys[code] = true; e.preventDefault(); }
             if (e.code === 'Enter') { this.keys.Enter = true; e.preventDefault(); }
+            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                this.keys.ShiftLeft = true;
+                this.keys.ShiftRight = true;
+                e.preventDefault();
+            }
         });
         window.addEventListener('keyup', (e) => {
             const code = e.code === 'Space' ? 'Space' : e.code;
             if (this.keys.hasOwnProperty(code)) { this.keys[code] = false; }
             if (e.code === 'Enter') { this.keys.Enter = false; }
+            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                this.keys.ShiftLeft = false;
+                this.keys.ShiftRight = false;
+            }
         });
     }
 }
@@ -1031,6 +1041,10 @@ class PlayerCar {
         // Hamulec ręczny - startowanie
         this.handbrakeBoost = 0; // Zgromadzona moc (0-1)
         this.previousSpaceKey = false; // Czy w poprzedniej klatce trzymał SPACE
+
+        // Turbo system
+        this.isTurboActive = false;
+        this.turboParticles = [];
     }
 
     toggleSteeringMode() {
@@ -1084,6 +1098,28 @@ class PlayerCar {
         // Normalize deltaTime to 60 FPS (deltaTime * 60 gives us a frame multiplier)
         const dt = deltaTime * 60;
 
+        // === TURBO SYSTEM ===
+        this.isTurboActive = input.keys.ShiftLeft || input.keys.ShiftRight;
+        const turboBoost = this.isTurboActive ? this.vehicleTurboMultiplier : 1.0;
+        const effectiveMaxSpeed = this.vehicleMaxSpeed * turboBoost;
+        const effectiveAccel = this.vehicleAcceleration * turboBoost;
+
+        // Spawn turbo particles
+        if (this.isTurboActive && Math.abs(this.speed) > 2) {
+            this.turboParticles.push({
+                x: this.x - Math.cos(this.angle) * this.l / 2,
+                y: this.y - Math.sin(this.angle) * this.l / 2,
+                life: 1.0,
+                angle: this.angle + Math.PI
+            });
+        }
+
+        // Update turbo particles
+        this.turboParticles = this.turboParticles.filter(p => {
+            p.life -= deltaTime * 2;
+            return p.life > 0;
+        });
+
         // === HAMULEC RĘCZNY - STARTOWANIE ===
         const isHandbraking = input.keys.Space;
         const isThrottling = input.keys.ArrowUp || input.keys.ArrowDown;
@@ -1131,8 +1167,8 @@ class PlayerCar {
         if (this.engineOn) {
             // 1. Acceleration (tylko jeśli NIE buduje boost)
             if (!(isHandbraking && isThrottling)) {
-                if (input.keys.ArrowUp) this.speed += this.vehicleAcceleration * dt;
-                else if (input.keys.ArrowDown) this.speed -= this.vehicleAcceleration * dt;
+                if (input.keys.ArrowUp) this.speed += effectiveAccel * dt;
+                else if (input.keys.ArrowDown) this.speed -= effectiveAccel * dt;
             }
 
             // 2. Braking (tylko jeśli NIE trzyma gazu równocześnie)
@@ -1154,7 +1190,7 @@ class PlayerCar {
         }
 
         // Limits
-        if (this.speed > this.vehicleMaxSpeed) this.speed = this.vehicleMaxSpeed;
+        if (this.speed > effectiveMaxSpeed) this.speed = effectiveMaxSpeed;
         if (this.speed < CONFIG.maxReverseSpeed) this.speed = CONFIG.maxReverseSpeed;
 
         // 4. Steering
@@ -1213,6 +1249,29 @@ class PlayerCar {
     updateWinterPhysics(input, deltaTime) {
         // Normalize deltaTime to 60 FPS (deltaTime * 60 gives us a frame multiplier)
         const dt = deltaTime * 60;
+
+        // === TURBO SYSTEM ===
+        this.isTurboActive = input.keys.ShiftLeft || input.keys.ShiftRight;
+        const turboBoost = this.isTurboActive ? this.vehicleTurboMultiplier : 1.0;
+        const effectiveMaxSpeed = this.vehicleMaxSpeed * turboBoost;
+        const effectiveAccel = this.vehicleAcceleration * turboBoost;
+
+        // Spawn turbo particles
+        const currentSpeed = Math.sqrt(this.velocityX * this.velocityX + this.velocityY * this.velocityY);
+        if (this.isTurboActive && currentSpeed > 2) {
+            this.turboParticles.push({
+                x: this.x - Math.cos(this.angle) * this.l / 2,
+                y: this.y - Math.sin(this.angle) * this.l / 2,
+                life: 1.0,
+                angle: this.angle + Math.PI
+            });
+        }
+
+        // Update turbo particles
+        this.turboParticles = this.turboParticles.filter(p => {
+            p.life -= deltaTime * 2;
+            return p.life > 0;
+        });
 
         // === HAMULEC RĘCZNY - STARTOWANIE ===
         const isHandbraking = input.keys.Space;
@@ -1297,8 +1356,8 @@ class PlayerCar {
 
         // Akceleracja tylko jeśli NIE buduje boost (hamulec + gaz)
         if (this.engineOn && !(isHandbraking && isThrottling)) {
-            if (input.keys.ArrowUp) throttle = this.vehicleAcceleration * dt;
-            else if (input.keys.ArrowDown) throttle = -this.vehicleAcceleration * dt;
+            if (input.keys.ArrowUp) throttle = effectiveAccel * dt;
+            else if (input.keys.ArrowDown) throttle = -effectiveAccel * dt;
         }
 
         // 3. Oblicz prędkość w lokalnym układzie samochodu (forward/lateral)
@@ -1318,7 +1377,7 @@ class PlayerCar {
 
         // Dodatkowy mnożnik dla dużych prędkości (symuluje v² efekt)
         const speedMagnitude = Math.sqrt(this.velocityX * this.velocityX + this.velocityY * this.velocityY);
-        const speedSquaredFactor = 1.0 + (speedMagnitude / this.vehicleMaxSpeed) * CONFIG.lateralForceMultiplier;
+        const speedSquaredFactor = 1.0 + (speedMagnitude / effectiveMaxSpeed) * CONFIG.lateralForceMultiplier;
 
         const desiredLateralVelocity = baseLateralVelocity * speedSquaredFactor;
 
@@ -1423,8 +1482,8 @@ class PlayerCar {
         }
 
         // 10. Ogranicz maksymalną prędkość
-        if (finalSpeed > this.vehicleMaxSpeed) {
-            const ratio = this.vehicleMaxSpeed / finalSpeed;
+        if (finalSpeed > effectiveMaxSpeed) {
+            const ratio = effectiveMaxSpeed / finalSpeed;
             this.velocityX *= ratio;
             this.velocityY *= ratio;
         }
@@ -1689,6 +1748,21 @@ class PlayerCar {
         ctx.restore();
 
         ctx.restore();
+
+        // Draw turbo particles (in world space, not vehicle space)
+        this.drawTurboEffects(ctx);
+    }
+
+    drawTurboEffects(ctx) {
+        this.turboParticles.forEach(p => {
+            ctx.save();
+            ctx.globalAlpha = p.life * 0.6;
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 5 * p.life, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
     }
 
     drawWheel(ctx, x, y, angle, wheelLength = CONFIG.wheelLength, wheelWidth = CONFIG.wheelWidth) {
@@ -2252,9 +2326,10 @@ class Game {
         this.currentObstacles = ld.obstacles || [];
         this.currentCurbs = ld.curbs || [];
         this.currentParkingZones = ld.parkingZones || [];
-        
+
         this.state = 'RUNNING';
         this.shakeTimer = 0;
+        this.gameStartTime = Date.now();
         
         document.getElementById('toggle-steering-mode').innerText = `Asystent Kierownicy: ${this.player.steeringMode === 'DRIVING' ? 'WŁ' : 'WYŁ'}`;
         document.getElementById('toggle-winter-mode').innerText = `Poślizgi Zimowe: ${this.player.winterMode ? 'WŁ' : 'WYŁ'}`;
@@ -2465,10 +2540,11 @@ class Game {
     draw() {
         ctx.save();
 
-        // Screen Shake Effect
-        if (this.shakeTimer > 0) {
-            const dx = (Math.random() - 0.5) * 10;
-            const dy = (Math.random() - 0.5) * 10;
+        // Screen Shake Effect (from collisions or turbo)
+        if (this.shakeTimer > 0 || (this.player && this.player.isTurboActive)) {
+            const shakeIntensity = this.shakeTimer > 0 ? 10 : 3;
+            const dx = (Math.random() - 0.5) * shakeIntensity;
+            const dy = (Math.random() - 0.5) * shakeIntensity;
             ctx.translate(dx, dy);
         }
 
@@ -2519,13 +2595,68 @@ class Game {
 
         // Rysuj ślady opon przed samochodem gracza
         this.player.drawSkidMarks(ctx);
+
+        // Speed lines when turbo active
+        if (this.player.isTurboActive) {
+            this.drawSpeedLines();
+        }
+
         this.player.draw(ctx);
+
+        // Turbo UI indicator and instructions
+        this.drawTurboUI();
 
         // Bonk
         if (this.state === 'GAMEOVER') {
             this.drawBonk();
         }
 
+        ctx.restore();
+    }
+
+    drawTurboUI() {
+        // Active turbo indicator (top-right corner)
+        if (this.player.isTurboActive) {
+            ctx.save();
+            const time = Date.now() / 200;
+            const pulse = 0.8 + Math.sin(time) * 0.2;
+
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.lineWidth = 3;
+
+            const text = 'TURBO';
+            const x = canvas.width - 120;
+            const y = 50;
+
+            ctx.strokeText(text, x, y);
+            ctx.fillText(text, x, y);
+
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 20;
+            ctx.fillText(text, x, y);
+
+            ctx.restore();
+        }
+    }
+
+    drawSpeedLines() {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 2;
+
+        for (let i = 0; i < 20; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const length = 20 + Math.random() * 30;
+            const angle = Math.atan2(this.player.y - y, this.player.x - x);
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
+            ctx.stroke();
+        }
         ctx.restore();
     }
 
