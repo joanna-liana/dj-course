@@ -984,11 +984,15 @@ class ParkingZone {
 }
 
 class PlayerCar {
-    constructor(x, y, angleDeg) {
+    constructor(x, y, angleDeg, vehicleType = 'sedan') {
+        this.vehicleType = vehicleType;
         this.reset(x, y, angleDeg);
     }
 
     reset(x, y, angleDeg) {
+        // Apply vehicle-specific properties
+        const vType = VEHICLE_TYPES[this.vehicleType];
+
         this.x = x;
         this.y = y;
         this.angle = angleDeg * (Math.PI / 180);
@@ -1000,8 +1004,15 @@ class PlayerCar {
         this.angularVelocity = 0; // Prędkość rotacji
 
         this.steeringAngle = 0;
-        this.w = CONFIG.carWidth;
-        this.l = CONFIG.carLength;
+        this.w = vType.width;
+        this.l = vType.length;
+        this.wheelBase = vType.wheelBase;
+        this.vehicleMaxSpeed = vType.maxSpeed;
+        this.vehicleAcceleration = vType.acceleration;
+        this.vehicleMaxSteerAngle = vType.maxSteerAngle;
+        this.vehicleBrakingForce = vType.brakingForce;
+        this.vehicleTireGrip = vType.tireGrip;
+        this.vehicleTurboMultiplier = vType.turboMultiplier;
         this.engineOn = true;
         this.enterKeyProcessed = false;
         this.steeringMode = 'DRIVING';
@@ -1119,14 +1130,14 @@ class PlayerCar {
         if (this.engineOn) {
             // 1. Acceleration (tylko jeśli NIE buduje boost)
             if (!(isHandbraking && isThrottling)) {
-                if (input.keys.ArrowUp) this.speed += CONFIG.acceleration * dt;
-                else if (input.keys.ArrowDown) this.speed -= CONFIG.acceleration * dt;
+                if (input.keys.ArrowUp) this.speed += this.vehicleAcceleration * dt;
+                else if (input.keys.ArrowDown) this.speed -= this.vehicleAcceleration * dt;
             }
 
             // 2. Braking (tylko jeśli NIE trzyma gazu równocześnie)
             if (input.keys.Space && !isThrottling) {
-                if (this.speed > 0) this.speed -= CONFIG.brakingForce * dt;
-                else if (this.speed < 0) this.speed += CONFIG.brakingForce * dt;
+                if (this.speed > 0) this.speed -= this.vehicleBrakingForce * dt;
+                else if (this.speed < 0) this.speed += this.vehicleBrakingForce * dt;
                 if (Math.abs(this.speed) < 0.5) this.speed = 0;
             }
         }
@@ -1142,7 +1153,7 @@ class PlayerCar {
         }
 
         // Limits
-        if (this.speed > CONFIG.maxSpeed) this.speed = CONFIG.maxSpeed;
+        if (this.speed > this.vehicleMaxSpeed) this.speed = this.vehicleMaxSpeed;
         if (this.speed < CONFIG.maxReverseSpeed) this.speed = CONFIG.maxReverseSpeed;
 
         // 4. Steering
@@ -1166,12 +1177,12 @@ class PlayerCar {
         }
 
         // Clamp steer
-        if (this.steeringAngle > CONFIG.maxSteerAngle) this.steeringAngle = CONFIG.maxSteerAngle;
-        if (this.steeringAngle < -CONFIG.maxSteerAngle) this.steeringAngle = -CONFIG.maxSteerAngle;
+        if (this.steeringAngle > this.vehicleMaxSteerAngle) this.steeringAngle = this.vehicleMaxSteerAngle;
+        if (this.steeringAngle < -this.vehicleMaxSteerAngle) this.steeringAngle = -this.vehicleMaxSteerAngle;
 
         // 5. Movement - prosty model kinematyczny
         if (Math.abs(this.speed) > 0.05) {
-            const L = CONFIG.wheelBase;
+            const L = this.wheelBase;
             const oldAngle = this.angle;
 
             this.angle += (this.speed / L) * Math.tan(this.steeringAngle) * dt;
@@ -1277,7 +1288,7 @@ class PlayerCar {
 
         // Ogranicz kąt skrętu - zawsze maksymalny, niezależnie od prędkości
         // Fizyka zadba o poślizg przy dużych prędkościach!
-        this.steeringAngle = Math.max(-CONFIG.maxSteerAngle, Math.min(CONFIG.maxSteerAngle, this.steeringAngle));
+        this.steeringAngle = Math.max(-this.vehicleMaxSteerAngle, Math.min(this.vehicleMaxSteerAngle, this.steeringAngle));
 
         // 2. Akceleracja i hamowanie
         const isBraking = input.keys.Space && !isThrottling; // Hamowanie tylko bez gazu
@@ -1285,8 +1296,8 @@ class PlayerCar {
 
         // Akceleracja tylko jeśli NIE buduje boost (hamulec + gaz)
         if (this.engineOn && !(isHandbraking && isThrottling)) {
-            if (input.keys.ArrowUp) throttle = CONFIG.acceleration * dt;
-            else if (input.keys.ArrowDown) throttle = -CONFIG.acceleration * dt;
+            if (input.keys.ArrowUp) throttle = this.vehicleAcceleration * dt;
+            else if (input.keys.ArrowDown) throttle = -this.vehicleAcceleration * dt;
         }
 
         // 3. Oblicz prędkość w lokalnym układzie samochodu (forward/lateral)
@@ -1306,12 +1317,12 @@ class PlayerCar {
 
         // Dodatkowy mnożnik dla dużych prędkości (symuluje v² efekt)
         const speedMagnitude = Math.sqrt(this.velocityX * this.velocityX + this.velocityY * this.velocityY);
-        const speedSquaredFactor = 1.0 + (speedMagnitude / CONFIG.maxSpeed) * CONFIG.lateralForceMultiplier;
+        const speedSquaredFactor = 1.0 + (speedMagnitude / this.vehicleMaxSpeed) * CONFIG.lateralForceMultiplier;
 
         const desiredLateralVelocity = baseLateralVelocity * speedSquaredFactor;
 
         // 6. Określ przyczepność opon (grip)
-        let currentGrip = isBraking ? CONFIG.tireGripBraking : CONFIG.tireGrip;
+        let currentGrip = isBraking ? CONFIG.tireGripBraking : this.vehicleTireGrip;
 
         // 7. Sprawdź warunek poślizgu
         const lateralChange = desiredLateralVelocity - lateralVelocity;
@@ -1335,7 +1346,7 @@ class PlayerCar {
             this.driftAngle = Math.atan2(newLateralVelocity, newForwardVelocity);
 
             // Podczas poślizgu - wolniejsza rotacja
-            this.angularVelocity = (newForwardVelocity / CONFIG.wheelBase) * Math.tan(this.steeringAngle) * currentGrip * dt;
+            this.angularVelocity = (newForwardVelocity / this.wheelBase) * Math.tan(this.steeringAngle) * currentGrip * dt;
 
             // Zastosuj tarcie podczas poślizgu
             newForwardVelocity *= Math.pow(CONFIG.driftFriction, dt);
@@ -1364,7 +1375,7 @@ class PlayerCar {
             const newLateralVelocity = desiredLateralVelocity;
 
             // Normalna rotacja
-            this.angularVelocity = (newForwardVelocity / CONFIG.wheelBase) * Math.tan(this.steeringAngle) * dt;
+            this.angularVelocity = (newForwardVelocity / this.wheelBase) * Math.tan(this.steeringAngle) * dt;
 
             // Konwersja z powrotem do współrzędnych globalnych
             this.velocityX = newForwardVelocity * cos - newLateralVelocity * sin;
@@ -1378,7 +1389,7 @@ class PlayerCar {
 
         // 8. Hamowanie
         if (isBraking) {
-            const brakingDeceleration = CONFIG.brakingForce * dt;
+            const brakingDeceleration = this.vehicleBrakingForce * dt;
             const currentSpeed = Math.sqrt(this.velocityX * this.velocityX + this.velocityY * this.velocityY);
 
             if (currentSpeed > 0.1) {
@@ -1411,8 +1422,8 @@ class PlayerCar {
         }
 
         // 10. Ogranicz maksymalną prędkość
-        if (finalSpeed > CONFIG.maxSpeed) {
-            const ratio = CONFIG.maxSpeed / finalSpeed;
+        if (finalSpeed > this.vehicleMaxSpeed) {
+            const ratio = this.vehicleMaxSpeed / finalSpeed;
             this.velocityX *= ratio;
             this.velocityY *= ratio;
         }
@@ -1622,7 +1633,7 @@ class Game {
         this.state = 'TITLE_SCREEN';
         this.bonkPos = {x:0, y:0};
         this.selectedVehicle = localStorage.getItem('selectedVehicle') || 'sedan';
-        this.player = new PlayerCar(0,0,0);
+        this.player = new PlayerCar(0, 0, 0, this.selectedVehicle);
         this.currentParkingZones = [];
         this.isMusicOn = true;
 
