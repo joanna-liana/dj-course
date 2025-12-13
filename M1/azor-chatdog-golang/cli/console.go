@@ -59,5 +59,5 @@ func DisplayFinalInstructions(sessionID string) {
 	PrintInfo("\n--- Instrukcja Kontynuacji Sesji ---")
 	PrintInfo(fmt.Sprintf("Aby kontynuować tę sesję (ID: %s) później, użyj komendy:", sessionID))
 	fmt.Printf("\n    %s\n\n", white(fmt.Sprintf("%s --session-id=%s", os.Args[0], sessionID)))
-	fmt.Println("--------------------------------------\n")
+	fmt.Println("--------------------------------------")
 }

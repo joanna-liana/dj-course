@@ -69,7 +69,7 @@ func clearScreen() {
 func displaySessionList(sessions []files.SessionInfo, selectedIndex int) {
 	clearScreen()
 	fmt.Println("\n=== Wybierz Sesję ===")
-	fmt.Println("Strzałki: nawigacja | Enter: wybierz | ESC/q: anuluj\n")
+	fmt.Println("Strzałki: nawigacja | Enter: wybierz | ESC/q: anuluj")
 
 	for i, session := range sessions {
 		if i == selectedIndex {

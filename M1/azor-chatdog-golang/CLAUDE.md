@@ -86,7 +86,10 @@ Get free API key: https://cloud.cerebras.ai
 - `cli/` - User interface
   - `console.go` - Colorized terminal output
   - `prompt.go` - Interactive input with tab completion
+  - `selector.go` - Interactive option selector with arrow keys
   - `args.go` - CLI argument parsing
+- `clarify/` - Clarifying question detection
+  - `parser.go` - Response parsing for numbered options
 - `files/` - File I/O
   - `config.go` - Environment variable loading
   - `session_files.go` - Session persistence to JSON
@@ -115,6 +118,40 @@ Sessions saved to `~/.azor/`:
 - **Session persistence:** Resume conversations with `--session-id`
 - **Token tracking:** Display token usage per message
 - **Colorized output:** Terminal colors for better UX
+- **Clarifying Questions:** AZOR automatically detects unclear prompts and offers multiple-choice options via arrow key selection
+
+## Clarifying Questions
+
+When AZOR detects an unclear or ambiguous prompt, it will automatically ask for clarification:
+
+**How it works:**
+1. AZOR presents a question with 2-4 numbered options
+2. Use arrow keys (↑/↓) to navigate options
+3. Press Enter to select
+4. Press Escape to skip selection and type a custom response instead
+
+**Example interaction:**
+```
+TY: fix it
+
+AZOR: Potrzebuję wyjaśnienia. Co chcesz naprawić?
+
+→ 1. Naprawić błąd w kodzie
+  2. Naprawić konfigurację
+  3. Naprawić dokumentację
+
+Wybierz opcję (ESC aby pominąć):
+```
+
+**Features:**
+- Maximum 2 clarifying questions per message (prevents endless loops)
+- Escape key allows free-form text input as alternative to selection
+- All LLM engines supported (Gemini, Cerebras, LLaMA)
+
+**Technical Details:**
+- Parser: `clarify/parser.go` - Detects numbered lists (1., 2., 3.)
+- Selector: `cli/selector.go` - Reusable arrow key navigation
+- Integration: `chat.go` MainLoop - Automatic detection after LLM response
 
 ## Slash Commands
 
@@ -137,6 +174,7 @@ Sessions saved to `~/.azor/`:
 - Google Gemini API integration
 - Session management (create, load, save, delete)
 - Interactive session selector with arrow key navigation
+- Clarifying questions with multi-choice options
 - Conversation history and WAL
 - Tab completion for commands
 - Token counting

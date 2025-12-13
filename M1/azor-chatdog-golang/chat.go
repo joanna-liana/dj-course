@@ -1,6 +1,7 @@
 package main
 
 import (
+	"azor-chatdog/clarify"
 	"azor-chatdog/cli"
 	"azor-chatdog/commands"
 	"azor-chatdog/session"
@@ -85,6 +86,46 @@ func MainLoop() {
 		if err != nil {
 			cli.PrintError(fmt.Sprintf("Błąd podczas wysyłania wiadomości: %v", err))
 			continue
+		}
+
+		// Check for clarifying questions (max 2 iterations)
+		clarificationCount := 0
+		maxClarifications := 2
+
+		for clarificationCount < maxClarifications {
+			clarifyQ, hasClarification := clarify.ParseResponse(response.Text)
+			if !hasClarification {
+				break
+			}
+
+			clarificationCount++
+
+			cli.PrintAssistant(fmt.Sprintf("\n%s: %s", sess.AssistantName(), clarifyQ.Question))
+
+			selected, ok := cli.SelectOption("Wybierz opcję (ESC aby pominąć):", clarifyQ.Options)
+
+			if !ok {
+				cli.PrintInfo("\nPodaj swoją odpowiedź:")
+				selected, err = cli.GetUserInput("TY: ")
+				if err == io.EOF {
+					cli.PrintInfo("\nWyjście (Ctrl+D).")
+					return
+				}
+				if err != nil {
+					cli.PrintError(fmt.Sprintf("\nWystąpił błąd podczas odczytu: %v", err))
+					break
+				}
+			}
+
+			response, err = sess.SendMessage(selected)
+			if err != nil {
+				cli.PrintError(fmt.Sprintf("Błąd podczas wysyłania odpowiedzi: %v", err))
+				break
+			}
+		}
+
+		if clarificationCount >= maxClarifications {
+			cli.PrintError("Zbyt wiele pytań wyjaśniających. Proszę przeformułować pytanie.")
 		}
 
 		// Get token info
