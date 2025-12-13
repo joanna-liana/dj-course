@@ -2372,6 +2372,61 @@ class Game {
                     new Curb(canvas.width/2, canvas.height/2 + 320, 80, canvas.width, 0),
                 ]
             },
+            {
+                name: "Spirala Parkingowa",
+                type: 'lot',
+                start: {
+                    x: canvas.width/2 + 400,
+                    y: canvas.height/2,
+                    angle: 90
+                },
+                obstacles: [],
+                cars: [],
+                parkingZones: [
+                    (() => {
+                        const centerX = canvas.width / 2;
+                        const centerY = canvas.height / 2;
+                        return new ParkingZone({
+                            x: centerX,
+                            y: centerY,
+                            w: 70,
+                            l: 120,
+                            angle: 180
+                        });
+                    })()
+                ],
+                curbs: (() => {
+                    const curbs = [];
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const rMax = 350;
+                    const rMin = 180;
+                    const totalRotation = 2 * Math.PI;
+                    const b = (rMax - rMin) / totalRotation;
+                    const rampWidth = 150;
+                    const curbWidth = 40;
+                    const curbLength = 30;
+                    const angleStep = Math.PI / 18;
+
+                    for (let theta = 0; theta <= totalRotation; theta += angleStep) {
+                        const r = rMax - b * theta;
+                        const x = centerX + r * Math.cos(theta);
+                        const y = centerY + r * Math.sin(theta);
+                        const tangentAngle = theta + Math.PI / 2;
+                        curbs.push(new Curb(x, y, curbWidth, curbLength, tangentAngle));
+                    }
+
+                    for (let theta = 0; theta <= totalRotation * 0.7; theta += angleStep) {
+                        const r = rMax - b * theta - rampWidth;
+                        const x = centerX + r * Math.cos(theta);
+                        const y = centerY + r * Math.sin(theta);
+                        const tangentAngle = theta + Math.PI / 2;
+                        curbs.push(new Curb(x, y, curbWidth, curbLength, tangentAngle));
+                    }
+
+                    return curbs;
+                })()
+            },
 
         ];
     }
