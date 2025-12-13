@@ -1548,24 +1548,96 @@ class PlayerCar {
         this.drawWheel(ctx, this.wheelBase/2, wheelTopY_L, this.steeringAngle, wheelLength, wheelWidth);
         this.drawWheel(ctx, this.wheelBase/2, wheelTopY_R, this.steeringAngle, wheelLength, wheelWidth);
 
-        // --- BODY ---
-        ctx.fillStyle = '#3498db';
+        // --- BODY --- (Different colors and shapes per vehicle type)
+        let bodyColor, roofColor, strokeColor;
+
+        switch(this.vehicleType) {
+            case 'sedan':
+                bodyColor = '#3498db'; // Blue
+                roofColor = '#85c1e9'; // Light blue
+                strokeColor = '#2980b9';
+                break;
+            case 'suv':
+                bodyColor = '#5d4037'; // Brown
+                roofColor = '#795548'; // Lighter brown
+                strokeColor = '#3e2723';
+                break;
+            case 'compact':
+                bodyColor = '#27ae60'; // Green
+                roofColor = '#52c77a'; // Light green
+                strokeColor = '#1e8449';
+                break;
+            case 'sports':
+                bodyColor = '#e74c3c'; // Red
+                roofColor = '#c0392b'; // Dark red (low profile)
+                strokeColor = '#a93226';
+                break;
+            case 'bike':
+                bodyColor = '#34495e'; // Dark gray
+                roofColor = '#e67e22'; // Orange accent
+                strokeColor = '#2c3e50';
+                break;
+            case 'scooter':
+                bodyColor = '#f39c12'; // Orange/yellow
+                roofColor = '#f1c40f'; // Bright yellow
+                strokeColor = '#d68910';
+                break;
+            default:
+                bodyColor = '#3498db';
+                roofColor = '#85c1e9';
+                strokeColor = '#2980b9';
+        }
+
+        ctx.fillStyle = bodyColor;
         ctx.beginPath();
-        ctx.roundRect(-this.l/2, -this.w/2, this.l, this.w, 6 * vehicleScale);
+
+        // Different shapes per vehicle
+        if (this.vehicleType === 'bike' || this.vehicleType === 'scooter') {
+            // Bikes/scooters: slim body, no roof
+            ctx.roundRect(-this.l/2, -this.w/4, this.l, this.w/2, 3 * vehicleScale);
+        } else if (this.vehicleType === 'sports') {
+            // Sports car: lower, sleeker
+            ctx.roundRect(-this.l/2, -this.w/2, this.l, this.w, 8 * vehicleScale);
+        } else if (this.vehicleType === 'suv') {
+            // SUV: taller, boxier
+            ctx.roundRect(-this.l/2, -this.w/2, this.l, this.w, 4 * vehicleScale);
+        } else {
+            // Sedan/compact: normal
+            ctx.roundRect(-this.l/2, -this.w/2, this.l, this.w, 6 * vehicleScale);
+        }
+
         ctx.fill();
-        ctx.strokeStyle = '#2980b9';
+        ctx.strokeStyle = strokeColor;
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Roof
-        ctx.fillStyle = '#85c1e9';
-        ctx.beginPath();
-        ctx.roundRect(-this.l/4, -this.w/2 + 6 * vehicleScale, this.l/2, this.w - 12 * vehicleScale, 3 * vehicleScale);
-        ctx.fill();
+        // Roof (not for bikes/scooters)
+        if (this.vehicleType !== 'bike' && this.vehicleType !== 'scooter') {
+            ctx.fillStyle = roofColor;
+            ctx.beginPath();
 
-        // Windshield indication (Front)
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
-        ctx.fillRect(this.l/4, -this.w/2 + 7 * vehicleScale, 5 * vehicleScale, this.w - 14 * vehicleScale);
+            if (this.vehicleType === 'sports') {
+                // Sports: smaller, lower roof
+                ctx.roundRect(-this.l/5, -this.w/2 + 4 * vehicleScale, this.l/3, this.w - 8 * vehicleScale, 2 * vehicleScale);
+            } else if (this.vehicleType === 'suv') {
+                // SUV: larger roof
+                ctx.roundRect(-this.l/3, -this.w/2 + 4 * vehicleScale, this.l/1.8, this.w - 8 * vehicleScale, 2 * vehicleScale);
+            } else {
+                // Sedan/compact: normal roof
+                ctx.roundRect(-this.l/4, -this.w/2 + 6 * vehicleScale, this.l/2, this.w - 12 * vehicleScale, 3 * vehicleScale);
+            }
+            ctx.fill();
+
+            // Windshield indication (Front)
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fillRect(this.l/4, -this.w/2 + 7 * vehicleScale, 5 * vehicleScale, this.w - 14 * vehicleScale);
+        } else {
+            // Bikes/scooters: Add seat/handlebar accent
+            ctx.fillStyle = roofColor;
+            ctx.beginPath();
+            ctx.arc(0, 0, 3 * vehicleScale, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
         if (this.engineOn) {
             // Lights
@@ -2392,7 +2464,7 @@ class Game {
 
     draw() {
         ctx.save();
-        
+
         // Screen Shake Effect
         if (this.shakeTimer > 0) {
             const dx = (Math.random() - 0.5) * 10;
@@ -2453,7 +2525,7 @@ class Game {
         if (this.state === 'GAMEOVER') {
             this.drawBonk();
         }
-        
+
         ctx.restore();
     }
 
