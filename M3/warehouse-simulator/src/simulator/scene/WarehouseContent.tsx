@@ -1,4 +1,4 @@
-import React, { useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useRef, useImperativeHandle, forwardRef, useMemo } from 'react';
 import { warehouseMap } from '../warehouseMap';
 import { getWorldPosition } from '../model/warehouse-utilities';
 import { TILE_TYPES } from '../model/warehouse.types';
@@ -7,21 +7,9 @@ import { Dock } from '../elements/Dock';
 import { FloorTile } from '../elements/FloorTile';
 import { HangingLamp } from '../elements/HangingLamp';
 import { Soldier, SoldierRef } from '../characters/Soldier';
+import { generatePatrolRoutes } from '../model/patrol-routes';
 
-const SOLDIER_POSITIONS = [
-  { row: 5, col: 11 },
-  { row: 3, col: 11 },
-  { row: 4, col: 8 },
-  { row: 7, col: 14 },
-  { row: 7, col: 3 },
-  { row: 10, col: 14 },
-  { row: 10, col: 3 },
-  { row: 11, col: 11 },
-  { row: 2, col: 17 },
-  { row: 5, col: 17 },
-  { row: 8, col: 17 },
-  { row: 11, col: 17 },
-];
+const SOLDIER_COUNT = 12;
 
 export interface WarehouseContentRef {
   killRandomSoldier: () => void;
@@ -30,6 +18,10 @@ export interface WarehouseContentRef {
 export const WarehouseContent = forwardRef<WarehouseContentRef, {}>((props, ref) => {
   const structure = warehouseMap.getStructure();
   const soldierRefs = useRef<(SoldierRef | null)[]>([]);
+
+  const patrolRoutes = useMemo(() => {
+    return generatePatrolRoutes(structure.aisles, SOLDIER_COUNT);
+  }, [structure.aisles]);
 
   useImperativeHandle(ref, () => ({
     killRandomSoldier: () => {
@@ -120,16 +112,13 @@ export const WarehouseContent = forwardRef<WarehouseContentRef, {}>((props, ref)
       })()}
       
       {/* Animated Soldiers */}
-      {SOLDIER_POSITIONS.map((pos, index) => {
-        const worldPos = getWorldPosition(pos.row, pos.col);
-        return (
-          <Soldier
-            ref={el => soldierRefs.current[index] = el}
-            key={`soldier-${index}`}
-            position={[worldPos.x, 0, worldPos.z]}
-          />
-        );
-      })}
+      {patrolRoutes.map((route, index) => (
+        <Soldier
+          ref={el => soldierRefs.current[index] = el}
+          key={`soldier-${index}`}
+          patrolRoute={route}
+        />
+      ))}
     </group>
   );
 });

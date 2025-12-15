@@ -4,12 +4,15 @@ import * as THREE from 'three';
 import { PositionalAudio } from '@react-three/drei';
 import { SS_SOLDIER_CONFIG, ASSET_MAP } from './config';
 import { SpriteAnimator } from './SpriteAnimator';
+import { PatrolRoute } from '../model/patrol-routes';
+import { useSoldierMovement } from './useSoldierMovement';
+import { SOLDIER_SPEED } from '../configuration';
 
 const MIN_BURST_SHOTS = 1;
 const MAX_BURST_SHOTS = 4;
 
 interface SoldierProps {
-  position: [number, number, number];
+  patrolRoute: PatrolRoute;
 }
 
 export interface SoldierRef {
@@ -67,7 +70,7 @@ const useChromaKeyTexture = (config: typeof SS_SOLDIER_CONFIG) => {
     return processedTexture;
   };
 
-export const Soldier = forwardRef<SoldierRef, SoldierProps>(({ position }, ref) => {
+export const Soldier = forwardRef<SoldierRef, SoldierProps>(({ patrolRoute }, ref) => {
   const { camera } = useThree();
   const meshRef = useRef<THREE.Mesh>(null!);
   const [isDead, setIsDead] = useState(false);
@@ -75,6 +78,11 @@ export const Soldier = forwardRef<SoldierRef, SoldierProps>(({ position }, ref) 
   const [attackTimer, setAttackTimer] = useState(Math.random() * 5000);
   const [burstShots, setBurstShots] = useState(0);
   const attackInterval = useMemo(() => 5000 + Math.random() * 3000, []);
+
+  const { position, movementDirection, updateMovement } = useSoldierMovement(
+    patrolRoute,
+    SOLDIER_SPEED
+  );
 
   const baseTexture = useChromaKeyTexture(SS_SOLDIER_CONFIG);
   const texture = useMemo(() => baseTexture?.clone(), [baseTexture]);
@@ -131,7 +139,7 @@ export const Soldier = forwardRef<SoldierRef, SoldierProps>(({ position }, ref) 
     if (!animator || !meshRef.current) return;
 
     if (!isDead) {
-        animator.update(clock.elapsedTime * 1000);
+        updateMovement(delta);
 
         if (camera) {
             meshRef.current.lookAt(camera.position);
@@ -139,17 +147,42 @@ export const Soldier = forwardRef<SoldierRef, SoldierProps>(({ position }, ref) 
             meshRef.current.rotation.z = 0;
         }
 
+        let walkAnimation = 'walk-front';
+        if (movementDirection.length() > 0.01 && camera) {
+            const toCameraDir = new THREE.Vector3()
+                .subVectors(camera.position, position)
+                .normalize();
+
+            toCameraDir.y = 0;
+            const moveDir = movementDirection.clone();
+            moveDir.y = 0;
+            moveDir.normalize();
+
+            const dotProduct = moveDir.dot(toCameraDir);
+            const crossProduct = new THREE.Vector3().crossVectors(moveDir, toCameraDir);
+
+            if (Math.abs(crossProduct.y) > Math.abs(dotProduct)) {
+                walkAnimation = crossProduct.y > 0 ? 'walk-left' : 'walk-right';
+            } else {
+                walkAnimation = dotProduct > 0 ? 'walk-front' : 'walk-back';
+            }
+        }
+
         if (isAttacking) {
+            animator.update(clock.elapsedTime * 1000);
             if (animator.isFinished) {
                 if (burstShots > 0) {
                     setBurstShots(s => s - 1);
                     animator.setSequence('attack', false);
                 } else {
                     setIsAttacking(false);
-                    animator.setSequence('walk-front', true);
+                    animator.setSequence(walkAnimation, true);
                 }
             }
         } else {
+            animator.setSequence(walkAnimation, true);
+            animator.update(clock.elapsedTime * 1000);
+
             setAttackTimer(t => t + delta * 1000);
             if (attackTimer > attackInterval) {
                 const shots = Math.floor(Math.random() * (MAX_BURST_SHOTS - MIN_BURST_SHOTS + 1)) + MIN_BURST_SHOTS;
@@ -176,7 +209,7 @@ export const Soldier = forwardRef<SoldierRef, SoldierProps>(({ position }, ref) 
   const geometryArgs: [number, number] = [SS_SOLDIER_CONFIG.scale * frameAspect, SS_SOLDIER_CONFIG.scale];
 
   return (
-    <mesh ref={meshRef} position={isDead ? [position[0], 0.01, position[2]] : [position[0], SS_SOLDIER_CONFIG.scale / 2, position[2]]} rotation-order="YXZ">
+    <mesh ref={meshRef} position={isDead ? [position.x, 0.01, position.z] : [position.x, SS_SOLDIER_CONFIG.scale / 2, position.z]} rotation-order="YXZ">
       <planeGeometry args={geometryArgs} />
       <meshBasicMaterial map={texture} transparent side={THREE.DoubleSide} alphaTest={0.5} />
       <PositionalAudio ref={attackAudioRef} url={ASSET_MAP.machine_gun_attack} loop distance={5} />

@@ -7,8 +7,8 @@ export const TILE_SIZE = 4;
 export const RACK_HEIGHT = 6;
 export const SHELF_HEIGHT = 1.2;
 export const PLAYER_HEIGHT = 1.7;
-export const MOVEMENT_SPEED = 0.2;
-export const FAST_MOVEMENT_SPEED = 0.4;
+export const MOVEMENT_SPEED = 0.6;
+export const FAST_MOVEMENT_SPEED = 1.0;
 export const ROTATION_SPEED = 0.08;
 
 // Columns where vertical aisles are placed
@@ -32,6 +32,11 @@ export const ZONE_COLORS = [
 export const INITIAL_PLAYER_TILE = { row: 4, col: 5 };
 
 export const INITIAL_PLAYER_ROTATION = 0; // 0 = facing north (negative Z direction)
+
+// Soldier movement configuration
+export const SOLDIER_SPEED = 0.03;
+export const WAYPOINT_PROXIMITY_THRESHOLD = 0.5;
+export const SOLDIER_ROTATION_SMOOTHING = 0.1;
 
 // Helper to get a color for a zone index (rotates if more zones than colors)
 export function getZoneColor(zoneIndex: number): string {
